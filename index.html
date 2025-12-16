@@ -364,6 +364,48 @@
             background: #555;
         }
 
+        /* ANIMATED SHAPES CSS */
+        .animated-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .shape {
+            position: absolute;
+            display: block;
+            list-style: none;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            opacity: 0;
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+        }
+
+        /* Animation for falling down */
+        @keyframes animateDown {
+            0% { transform: translateY(-150px) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.15; }
+            90% { opacity: 0.15; }
+            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* Animation for rising up */
+        @keyframes animateUp {
+            0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.15; }
+            90% { opacity: 0.15; }
+            100% { transform: translateY(-150px) rotate(360deg); opacity: 0; }
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 50px 20px;
@@ -390,6 +432,9 @@
 <body>
     <div class="cursor"></div>
     <div class="cursor-follower"></div>
+
+    <!-- Container para blocos animados -->
+    <div class="animated-shapes"></div>
     
     <div class="scroll-indicator">
         <div class="scroll-dot" data-section="header"></div>
@@ -398,6 +443,38 @@
         <div class="scroll-dot" data-section="servicos"></div>
         <div class="scroll-dot" data-section="contato"></div>
     </div>
+
+    <script>
+        // GERADOR DE BLOCOS ANIMADOS (Mesma lógica da Bia)
+        const shapesContainer = document.querySelector('.animated-shapes');
+        const shapeCount = 60;
+
+        for (let i = 0; i < shapeCount; i++) {
+            const shape = document.createElement('div');
+            shape.classList.add('shape');
+            
+            shape.style.left = Math.random() * 100 + 'vw';
+            
+            const size = Math.random() * 60 + 15;
+            shape.style.width = size + 'px';
+            shape.style.height = size + 'px';
+            
+            const duration = Math.random() * 20 + 10; 
+            shape.style.animationDuration = duration + 's';
+            shape.style.animationDelay = -(Math.random() * duration) + 's';
+
+            const isGoingUp = Math.random() > 0.5;
+            if (isGoingUp) {
+                shape.style.animationName = 'animateUp';
+                shape.style.bottom = '-150px';
+            } else {
+                shape.style.animationName = 'animateDown';
+                shape.style.top = '-150px';
+            }
+            
+            shapesContainer.appendChild(shape);
+        }
+    </script>
     
     <div class="container">
         <header id="header">
@@ -424,7 +501,12 @@
             <h2 class="section-title">Projetos</h2>
             
             <div class="work-item">
-                <h3>Bia - Atendente IA Completa para Clínicas</h3>
+                <!-- LINK PARA A PÁGINA DA BIA -->
+                <h3>
+                    <a href="bia.html" style="text-decoration: none; color: inherit;">
+                        Bia - Atendente IA Completa para Clínicas
+                    </a>
+                </h3>
                 <p>Sistema completo de atendimento automatizado via WhatsApp para clínicas de estética. A Bia conversa naturalmente processando texto, áudio e imagens, enquanto o MCP Server integrado ao GoHighLevel executa todas as ações: gerencia agendamentos com verificação de disponibilidade, movimenta leads no pipeline, consulta catálogo de tratamentos e envia prova social.</p>
                 <div class="tags">
                     <span class="tag">n8n</span>
@@ -581,7 +663,6 @@
                     entry.target.style.opacity = '1';
                     entry.target.style.transform = 'translateY(0)';
                     
-                    // Adiciona classe visible para section-title
                     if (entry.target.classList.contains('section-title')) {
                         entry.target.classList.add('visible');
                     }
