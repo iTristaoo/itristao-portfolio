@@ -446,6 +446,7 @@
         <div class="scroll-dot" data-section="projetos"></div>
         <div class="scroll-dot" data-section="casos"></div>
         <div class="scroll-dot" data-section="servicos"></div>
+        <div class="scroll-dot" data-section="experimente"></div> <!-- NOVO DOT -->
         <div class="scroll-dot" data-section="contato"></div>
     </div>
 
@@ -506,7 +507,6 @@
             <h2 class="section-title">Projetos</h2>
             
             <div class="work-item">
-                <!-- LINK PARA A PÁGINA DA BIA -->
                 <h3>
                     <a href="bia.html" style="text-decoration: none; color: inherit;">
                         Bia - Atendente IA Completa para Clínicas
@@ -527,7 +527,6 @@
             </div>
 
             <div class="work-item">
-                <!-- LINK ATUALIZADO AQUI -->
                 <h3>
                     <a href="agendamento.html" style="text-decoration: none; color: inherit;">
                         Sistema de Agendamento Inteligente para Clínicas
@@ -634,6 +633,19 @@
             </div>
         </section>
 
+        <!-- NOVA SEÇÃO EXPERIMENTE -->
+        <section class="section" id="experimente">
+            <h2 class="section-title">Experimente</h2>
+            
+            <div class="work-item">
+                <h3>Playground Interativo</h3>
+                <p>Quer ver como funciona na prática? Acesse o playground interativo e execute um workflow simulado. Veja os dados fluindo em tempo real.</p>
+                <div style="margin-top: 20px;">
+                    <a href="playground.html" style="color: #9d4edd; text-decoration: none; border-bottom: 1px solid #9d4edd; transition: all 0.3s; padding-bottom: 2px;">🎮 Acessar Playground →</a>
+                </div>
+            </div>
+        </section>
+
         <section class="contact" id="contato">
             <h2 class="section-title">Contato</h2>
             <p>Se você tem um projeto ou quer trocar networking sobre automação e IA, é só chamar.</p>
@@ -725,7 +737,7 @@
         });
 
         // Scroll indicator
-        const sections = ['header', 'projetos', 'casos', 'servicos', 'contato'];
+        const sections = ['header', 'projetos', 'casos', 'servicos', 'experimente', 'contato'];
         const dots = document.querySelectorAll('.scroll-dot');
         const container = document.querySelector('.container');
 
