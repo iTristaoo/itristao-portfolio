@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluxo Bia - iTristao</title>
+    <link rel="icon" type="image/png" href="https://hqtzrdjnmzmeeytuwgfv.supabase.co/storage/v1/object/public/mee/favicon.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0d0d0d;
+            color: #e0e0e0;
+            line-height: 1.6;
+            cursor: none;
+            overflow-x: hidden;
+            position: relative; /* Necessário para o z-index dos shapes funcionar bem */
+        }
+
+        /* Background animado (mesmo estilo da home) */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+
+        .cursor {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #fff;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.15s ease;
+            mix-blend-mode: difference;
+        }
+
+        .cursor-follower {
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s ease;
+            mix-blend-mode: difference;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 80px 30px;
+            position: relative;
+            z-index: 1; /* Garante que o conteúdo fique acima dos shapes */
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 40px;
+            color: #888;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: #fff;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .description {
+            font-size: 1.2em;
+            color: #aaa;
+            margin-bottom: 60px;
+            max-width: 700px;
+        }
+
+        /* Flow Styles */
+        .flow-container {
+            position: relative;
+            padding-left: 40px;
+            margin-bottom: 100px;
+        }
+
+        .flow-container::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 10px;
+            bottom: 10px;
+            width: 2px;
+            background: linear-gradient(180deg, #333 0%, #333 80%, transparent 100%);
+        }
+
+        .flow-step {
+            margin-bottom: 50px;
+            position: relative;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInStep 0.6s ease forwards;
+        }
+
+        @keyframes fadeInStep {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .flow-step::before {
+            content: '';
+            position: absolute;
+            left: -44px; /* Ajuste para centralizar na linha */
+            top: 8px;
+            width: 10px;
+            height: 10px;
+            background: #0d0d0d;
+            border: 2px solid #666;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .flow-step:hover::before {
+            background: #fff;
+            border-color: #fff;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        .step-title {
+            font-size: 1.1em;
+            color: #fff;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .step-content {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #2a2a2a;
+            color: #bbb;
+            font-size: 0.95em;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .flow-step:hover .step-content {
+            transform: translateX(10px);
+            border-color: #444;
+        }
+
+        .tech-badge {
+            display: inline-block;
+            font-size: 0.75em;
+            padding: 2px 8px;
+            background: #333;
+            color: #fff;
+            border-radius: 4px;
+            margin-right: 6px;
+            margin-top: 10px;
+        }
+        
+        /* Highlight specific words */
+        .highlight {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        /* --- NEW IMPACT SECTION STYLES --- */
+        .impact-section {
+            padding-top: 50px;
+            border-top: 1px solid #1a1a1a;
+            margin-bottom: 80px;
+        }
+
+        .impact-title {
+            font-size: 1.8em;
+            color: #fff;
+            margin-bottom: 40px;
+            font-weight: 500;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid #2a2a2a;
+            padding: 30px;
+            border-radius: 12px;
+            transition: transform 0.3s, border-color 0.3s, background 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: #444;
+            background: rgba(255,255,255,0.04);
+        }
+
+        .stat-name {
+            font-size: 1.1em;
+            color: #e0e0e0;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .stat-desc {
+            font-size: 0.9em;
+            color: #888;
+            margin-bottom: 30px;
+            line-height: 1.5;
+            flex-grow: 1;
+        }
+
+        /* Chart Styles */
+        .chart-container {
+            margin-top: auto;
+        }
+
+        .chart-row {
+            margin-bottom: 15px;
+        }
+        
+        .chart-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .chart-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8em;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .chart-bar-bg {
+            width: 100%;
+            height: 4px;
+            background: #222;
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chart-bar-fill {
+            height: 100%;
+            background: #444;
+            width: 0; /* Animated via JS */
+            border-radius: 2px;
+            transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .chart-bar-fill.highlight {
+            background: #fff;
+            box-shadow: 0 0 10px rgba(255,255,255,0.4);
+        }
+
+        /* ANIMATED SHAPES CSS (Adicionado da Home) */
+        .animated-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1; /* Atrás de tudo */
+            pointer-events: none;
+        }
+
+        .shape {
+            position: absolute;
+            display: block;
+            list-style: none;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            opacity: 0;
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+        }
+
+        /* Animation for falling down */
+        @keyframes animateDown {
+            0% { transform: translateY(-150px) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.15; }
+            90% { opacity: 0.15; }
+            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* Animation for rising up */
+        @keyframes animateUp {
+            0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.15; }
+            90% { opacity: 0.15; }
+            100% { transform: translateY(-150px) rotate(360deg); opacity: 0; }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+
+    <!-- Container vazio para ser preenchido pelo JS (Adicionado da Home) -->
+    <div class="animated-shapes"></div>
+
+    <div class="container">
+        <a href="index.html" class="back-link">← Voltar para Home</a>
+        
+        <h1>Fluxo Técnico: Bia SDR</h1>
+        <p class="description">
+            Uma visão detalhada de como a automação processa leads, qualifica intenções e executa ações no CRM sem intervenção humana.
+        </p>
+
+        <div class="flow-container">
+            
+            <!-- Step 1 -->
+            <div class="flow-step" style="animation-delay: 0.1s;">
+                <div class="step-title">1. Entrada e Captura</div>
+                <div class="step-content">
+                    O fluxo inicia quando um lead envia uma mensagem no WhatsApp. O <span class="highlight">Webhook</span> recebe o payload, e o sistema imediatamente extrai o número de telefone e o conteúdo da mensagem. Se for um áudio, ele é transcrito para texto automaticamente.
+                    <br>
+                    <span class="tech-badge">Webhook</span>
+                    <span class="tech-badge">OpenAI Whisper</span>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="flow-step" style="animation-delay: 0.3s;">
+                <div class="step-title">2. Identificação e Contexto</div>
+                <div class="step-content">
+                    O sistema consulta o <span class="highlight">GoHighLevel (GHL)</span> para verificar se o contato já existe. Se existir, recupera o histórico da conversa e o estágio atual no pipeline. Se não, cria um novo contato. Isso garante que a IA tenha memória das interações passadas.
+                    <br>
+                    <span class="tech-badge">GHL API</span>
+                    <span class="tech-badge">Supabase</span>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="flow-step" style="animation-delay: 0.5s;">
+                <div class="step-title">3. Agente de IA (Cérebro)</div>
+                <div class="step-content">
+                    O <span class="highlight">AI Agent</span> analisa a intenção do usuário. Ele não apenas responde, mas decide qual ferramenta usar. Ele possui acesso a "tools" específicas:
+                    <ul>
+                        <li><strong>Calculator:</strong> Para orçamentos.</li>
+                        <li><strong>Schedule:</strong> Para verificar disponibilidade de agenda.</li>
+                        <li><strong>Knowledge Base:</strong> Para tirar dúvidas sobre procedimentos (RAG).</li>
+                    </ul>
+                    <br>
+                    <span class="tech-badge">OpenAI GPT-4o</span>
+                    <span class="tech-badge">LangChain</span>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="flow-step" style="animation-delay: 0.7s;">
+                <div class="step-title">4. Tratamento de Objeções</div>
+                <div class="step-content">
+                    Se o cliente apresentar resistência (ex: "está caro", "vou ver com meu marido"), um módulo específico de <span class="highlight">Quebra de Objeções</span> é ativado. A IA consulta uma base de melhores respostas persuasivas e tenta reverter a situação antes de desistir do lead.
+                    <br>
+                    <span class="tech-badge">Vector Store</span>
+                    <span class="tech-badge">Prompt Engineering</span>
+                </div>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="flow-step" style="animation-delay: 0.9s;">
+                <div class="step-title">5. Ação e Saída</div>
+                <div class="step-content">
+                    Com a resposta gerada, o sistema executa a ação final:
+                    1. Envia a resposta no WhatsApp (texto ou áudio gerado pela ElevenLabs).
+                    2. Atualiza o status do lead no CRM (ex: move para "Interessado").
+                    3. Se houve agendamento, cria o evento no calendário.
+                    <br>
+                    <span class="tech-badge">WhatsApp API</span>
+                    <span class="tech-badge">GHL Pipeline</span>
+                    <span class="tech-badge">ElevenLabs</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- IMPACT SECTION -->
+        <section class="impact-section">
+            <h2 class="impact-title">Soluções e Impacto na Clínica</h2>
+            
+            <div class="stats-grid">
+                
+                <!-- Card 1: Disponibilidade -->
+                <div class="stat-card">
+                    <div class="stat-name">Cobertura de Atendimento</div>
+                    <div class="stat-desc">
+                        Humanos dormem e descansam. A Bia garante que nenhum lead da madrugada ou fim de semana fique no vácuo, aumentando as chances de conversão.
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-row">
+                            <div class="chart-label"><span>Humano (8h/dia)</span><span>33%</span></div>
+                            <div class="chart-bar-bg"><div class="chart-bar-fill" style="width: 33%"></div></div>
+                        </div>
+                        <div class="chart-row">
+                            <div class="chart-label"><span style="color: #fff">Bia (24h/dia)</span><span style="color: #fff">100%</span></div>
+                            <div class="chart-bar-bg"><div class="chart-bar-fill highlight" data-width="100%"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Tempo de Resposta -->
+                <div class="stat-card">
+                    <div class="stat-name">Velocidade de Resposta</div>
+                    <div class="stat-desc">
+                        Mesmo em tarefas complexas, o tempo de resposta é infinitamente superior ao humano, garantindo que o lead não esfrie enquanto aguarda.
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-row">
+                            <div class="chart-label"><span>Humano (Média)</span><span>~30 min</span></div>
+                            <div class="chart-bar-bg"><div class="chart-bar-fill" style="width: 100%"></div></div>
+                        </div>
+                        <div class="chart-row">
+                            <div class="chart-label"><span style="color: #bbb">Bia (Simples)</span><span style="color: #bbb">~45s</span></div>
+                            <div class="chart-bar-bg"><div class="chart-bar-fill highlight" data-width="5%"></div></div>
+                        </div>
+                        <div class="chart-row">
+                            <div class="chart-label"><span style="color: #fff">Bia (Com Tools)</span><span style="color: #fff">~1m 30s</span></div>
+                            <div class="chart-bar-bg"><div class="chart-bar-fill highlight" data-width="12%"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Custo Operacional -->
+                <div class="stat-card">
+                    <div class="stat-name">Escalabilidade</div>
+                    <div class="stat-desc">
+                        Capacidade de atender múltiplos clientes simultaneamente sem fila de espera e sem aumentar o custo fixo com equipe.
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-row">
+                            <div class="chart-label"><span>Capacidade Humana</span><span>1:1</span></div>
+                            <div class="chart-bar-bg"><div class="chart-bar-fill" style="width: 20%"></div></div>
+                        </div>
+                        <div class="chart-row">
+                            <div class="chart-label"><span style="color: #fff">Capacidade Bia</span><span style="color: #fff">Ilimitada</span></div>
+                            <div class="chart-bar-bg"><div class="chart-bar-fill highlight" data-width="100%"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // GERADOR DE BLOCOS ANIMADOS (Mesma lógica da Home)
+        const shapesContainer = document.querySelector('.animated-shapes');
+        const shapeCount = 60; // Quantidade de blocos
+
+        for (let i = 0; i < shapeCount; i++) {
+            const shape = document.createElement('div');
+            shape.classList.add('shape');
+            
+            // Posição horizontal aleatória
+            shape.style.left = Math.random() * 100 + 'vw';
+            
+            // Tamanho aleatório (variando um pouco mais)
+            const size = Math.random() * 60 + 15;
+            shape.style.width = size + 'px';
+            shape.style.height = size + 'px';
+            
+            // Duração aleatória
+            const duration = Math.random() * 20 + 10; 
+            shape.style.animationDuration = duration + 's';
+            
+            // Delay Negativo para loop infinito
+            shape.style.animationDelay = -(Math.random() * duration) + 's';
+
+            // DIREÇÃO ALEATÓRIA
+            const isGoingUp = Math.random() > 0.5;
+
+            if (isGoingUp) {
+                shape.style.animationName = 'animateUp';
+                shape.style.bottom = '-150px';
+            } else {
+                shape.style.animationName = 'animateDown';
+                shape.style.top = '-150px';
+            }
+            
+            shapesContainer.appendChild(shape);
+        }
+
+        // Cursor customizado (Replicado da Home)
+        const cursor = document.querySelector('.cursor');
+        const cursorFollower = document.querySelector('.cursor-follower');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.transform = `translate(${e.clientX - 10}px, ${e.clientY - 10}px)`;
+            cursorFollower.style.transform = `translate(${e.clientX - 4}px, ${e.clientY - 4}px)`;
+        });
+
+        // Efeito hover nos links e steps
+        document.querySelectorAll('a, .flow-step, .stat-card').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursor.style.transform = `translate(${event.clientX - 10}px, ${event.clientY - 10}px) scale(1.5)`;
+            });
+            el.addEventListener('mouseleave', () => {
+                cursor.style.transform = `translate(${event.clientX - 10}px, ${event.clientY - 10}px) scale(1)`;
+            });
+        });
+
+        // Animação dos Gráficos ao rolar a página
+        const observerOptions = {
+            threshold: 0.2
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const bars = entry.target.querySelectorAll('.chart-bar-fill[data-width]');
+                    bars.forEach(bar => {
+                        bar.style.width = bar.getAttribute('data-width');
+                    });
+                    observer.unobserve(entry.target); // Animar apenas uma vez
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.stat-card').forEach(card => {
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
