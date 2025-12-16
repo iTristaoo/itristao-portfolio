@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Agendamento - iTristao</title>
+    <link rel="icon" type="image/png" href="https://hqtzrdjnmzmeeytuwgfv.supabase.co/storage/v1/object/public/mee/favicon.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0d0d0d;
+            color: #e0e0e0;
+            line-height: 1.6;
+            cursor: none;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+
+        .cursor {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #fff;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.15s ease;
+            mix-blend-mode: difference;
+        }
+
+        .cursor-follower {
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s ease;
+            mix-blend-mode: difference;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 80px 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 40px;
+            color: #888;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: #fff;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .description {
+            font-size: 1.2em;
+            color: #aaa;
+            margin-bottom: 60px;
+            max-width: 700px;
+        }
+
+        .flow-container {
+            position: relative;
+            padding-left: 40px;
+            margin-bottom: 100px;
+        }
+
+        .flow-container::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 10px;
+            bottom: 10px;
+            width: 2px;
+            background: linear-gradient(180deg, #333 0%, #333 80%, transparent 100%);
+        }
+
+        .flow-step {
+            margin-bottom: 50px;
+            position: relative;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInStep 0.6s ease forwards;
+        }
+
+        @keyframes fadeInStep {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .flow-step::before {
+            content: '';
+            position: absolute;
+            left: -44px;
+            top: 8px;
+            width: 10px;
+            height: 10px;
+            background: #0d0d0d;
+            border: 2px solid #666;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .flow-step:hover::before {
+            background: #fff;
+            border-color: #fff;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        .step-title {
+            font-size: 1.1em;
+            color: #fff;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .step-content {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #2a2a2a;
+            color: #bbb;
+            font-size: 0.95em;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .flow-step:hover .step-content {
+            transform: translateX(10px);
+            border-color: #444;
+        }
+
+        .tech-badge {
+            display: inline-block;
+            font-size: 0.75em;
+            padding: 2px 8px;
+            background: #333;
+            color: #fff;
+            border-radius: 4px;
+            margin-right: 6px;
+            margin-top: 10px;
+        }
+        
+        .highlight {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .impact-section {
+            padding-top: 50px;
+            border-top: 1px solid #1a1a1a;
+            margin-bottom: 80px;
+        }
+
+        /* TÍTULO CENTRALIZADO */
+        .impact-title {
+            font-size: 1.8em;
+            color: #fff;
+            margin-bottom: 40px;
+            font-weight: 500;
+            text-align: center; /* Adicionado para centralizar o título */
+        }
+
+        .stats-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid #2a2a2a;
+            padding: 30px;
+            border-radius: 12px;
+            transition: transform 0.3s, border-color 0.3s, background 0.3s;
+            display: flex;
+            flex-direction: column;
+            
+            flex: 1 1 300px; 
+            max-width: 450px;
+            width: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: #444;
+            background: rgba(255,255,255,0.04);
+        }
+
+        .stat-name {
+            font-size: 1.1em;
+            color: #e0e0e0;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .stat-desc {
+            font-size: 0.9em;
+            color: #888;
+            margin-bottom: 30px;
+            line-height: 1.5;
+            flex-grow: 1;
+        }
+
+        .chart-container {
+            margin-top: auto;
+        }
+
+        .chart-row {
+            margin-bottom: 15px;
+        }
+        
+        .chart-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .chart-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8em;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .chart-bar-bg {
+            width: 100%;
+            height: 4px;
+            background: #222;
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chart-bar-fill {
+            height: 100%;
+            background: #444;
+            width: 0;
+            border-radius: 2px;
+            transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .chart-bar-fill.highlight {
+            background: #fff;
+            box-shadow: 0 0 10px rgba(255,255,255,0.4);
+        }
+
+        .animated-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .shape {
+            position: absolute;
+            display: block;
+            list-style: none;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            opacity: 0;
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+        }
+
+        @keyframes animateDown {
+            0% { transform: translateY(-150px) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.15; }
+            90% { opacity: 0.15; }
+            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+
+        @keyframes animateUp {
+            0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.15; }
+            90% { opacity: 0.15; }
+            100% { transform: translateY(-150px) rotate(360deg); opacity: 0; }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+    <div class="animated-shapes"></div>
+
+    <div class="container">
+        <a href="index.html" class="back-link">← Voltar para Home</a>
+        
+        <h1>Sistema de Agendamento Inteligente</h1>
+        <p class="description">
+            Workflow avançado que gerencia múltiplos profissionais em tempo real, previne conflitos de horário e sincroniza automaticamente com GoHighLevel.
+        </p>
+
+        <div class="flow-container">
+            
+            <div class="flow-step" style="animation-delay: 0.1s;">
+                <div class="step-title">1. Identificação e Contexto</div>
+                <div class="step-content">
+                    O sistema recebe o pedido de agendamento e imediatamente consulta o <span class="highlight">Supabase</span> e o <span class="highlight">GoHighLevel</span> para buscar o histórico completo do cliente. Identifica se já existe uma oportunidade ativa no pipeline e recupera dados como nome, email e telefone formatado.
+                    <br>
+                    <span class="tech-badge">Supabase</span>
+                    <span class="tech-badge">GoHighLevel API</span>
+                </div>
+            </div>
+
+            <div class="flow-step" style="animation-delay: 0.3s;">
+                <div class="step-title">2. Mapeamento de Profissional</div>
+                <div class="step-content">
+                    Com base no nome do médico solicitado (Dr. Felipe ou Dra. Gabriela), o sistema mapeia automaticamente o <span class="highlight">Calendar ID</span> correto e a especialidade. Aceita variações no input (maiúsculas, com/sem ponto, apenas primeiro nome) e normaliza para garantir precisão.
+                    <br>
+                    <span class="tech-badge">String Normalization</span>
+                    <span class="tech-badge">Calendar Mapping</span>
+                </div>
+            </div>
+
+            <div class="flow-step" style="animation-delay: 0.5s;">
+                <div class="step-title">3. Decisor de Fluxo</div>
+                <div class="step-content">
+                    O <span class="highlight">Switch</span> verifica o tipo de evento (agendamento, cancelamento ou reagendamento) e direciona para o fluxo correto. Cada tipo tem validações e ações específicas para garantir integridade dos dados.
+                    <br>
+                    <span class="tech-badge">Conditional Logic</span>
+                    <span class="tech-badge">Flow Control</span>
+                </div>
+            </div>
+
+            <div class="flow-step" style="animation-delay: 0.7s;">
+                <div class="step-title">4. Verificação de Conflitos</div>
+                <div class="step-content">
+                    Antes de criar qualquer agendamento, o sistema busca na <span class="highlight">API de Events do GoHighLevel</span> se o cliente já possui um horário marcado. Usa três estratégias de busca (Event ID, Contact ID, Email) para garantir que nenhum agendamento duplicado seja criado.
+                    <br>
+                    <span class="tech-badge">Event Lookup</span>
+                    <span class="tech-badge">Deduplication</span>
+                </div>
+            </div>
+
+            <div class="flow-step" style="animation-delay: 0.9s;">
+                <div class="step-title">5. Validação de Disponibilidade</div>
+                <div class="step-content">
+                    Consulta a rota <span class="highlight">/free-slots</span> do calendário do profissional selecionado, retornando apenas os horários realmente livres. Valida se o horário solicitado está na lista de slots disponíveis antes de prosseguir.
+                    <br>
+                    <span class="tech-badge">GoHighLevel Calendar API</span>
+                    <span class="tech-badge">Slot Validation</span>
+                </div>
+            </div>
+
+            <div class="flow-step" style="animation-delay: 1.1s;">
+                <div class="step-title">6. Criação ou Atualização</div>
+                <div class="step-content">
+                    <strong>Novo Agendamento:</strong> Cria o evento via API com status "confirmed" e atualiza o pipeline para "Consulta Marcada".<br>
+                    <strong>Reagendamento:</strong> Cancela o evento antigo (se não cancelado pelo GHL), cria novo agendamento e atualiza o Event_ID no Supabase.<br>
+                    <strong>Cancelamento:</strong> Marca o evento como "cancelled" e atualiza o custom field "status_da_consulta" no CRM.
+                    <br>
+                    <span class="tech-badge">API Orchestration</span>
+                    <span class="tech-badge">State Management</span>
+                </div>
+            </div>
+
+            <div class="flow-step" style="animation-delay: 1.3s;">
+                <div class="step-title">7. Sincronização Multi-Sistema</div>
+                <div class="step-content">
+                    Após confirmar o agendamento, o sistema atualiza <span class="highlight">três pontos de controle</span>: armazena o Event_ID no Supabase (para referência futura), move a oportunidade para a etapa correta do pipeline no GoHighLevel, e atualiza o custom field "status_da_consulta" para rastreamento visual no CRM.
+                    <br>
+                    <span class="tech-badge">Multi-System Sync</span>
+                    <span class="tech-badge">Data Consistency</span>
+                </div>
+            </div>
+
+        </div>
+
+        <section class="impact-section">
+            <h2 class="impact-title">Impacto e Eficiência</h2>
+            
+            <div class="stats-grid">
+                
+                <div class="stat-card">
+                    <div class="stat-name">Taxa de Erro Humano</div>
+                    <div class="stat-desc">
+                        Erros comuns como dupla marcação, conflito de horários ou esquecimento de atualizar o CRM são completamente eliminados pela automação.
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-row">
+                            <div class="chart-label"><span>Humano</span><span>~15%</span></div>
+                            <div class="chart-bar-bg"><div class="chart-bar-fill" style="width: 15%"></div></div>
+                        </div>
+                        <div class="chart-row">
+                            <div class="chart-label"><span style="color: #fff">Sistema</span><span style="color: #fff">0%</span></div>
+                            <div class="chart-bar-bg"><div class="chart-bar-fill highlight" data-width="0%"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-name">Tempo de Processamento</div>
+                    <div class="stat-desc">
+                        Do pedido até a confirmação final com atualização em todos os sistemas. Inclui validação de disponibilidade, criação do evento e sincronização do CRM.
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-row">
+                            <div class="chart-label"><span>Humano</span><span>~5 min</span></div>
+                            <div class="chart-bar-bg"><div class="chart-bar-fill" style="width: 100%"></div></div>
+                        </div>
+                        <div class="chart-row">
+                            <div class="chart-label"><span style="color: #fff">Sistema</span><span style="color: #fff">~8s</span></div>
+                            <div class="chart-bar-bg"><div class="chart-bar-fill highlight" data-width="3%"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-name">Gestão de Múltiplos Profissionais</div>
+                    <div class="stat-desc">
+                        O sistema gerencia automaticamente as agendas de Dr. Felipe (Facial) e Dra. Gabriela (Corporal), direcionando cada cliente para o calendário correto sem intervenção manual.
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-row">
+                            <div class="chart-label"><span>Profissionais</span><span>2</span></div>
+                            <div class="chart-bar-bg"><div class="chart-bar-fill highlight" data-width="100%"></div></div>
+                        </div>
+                        <div class="chart-row">
+                            <div class="chart-label"><span style="color: #fff">Intervenção Manual</span><span style="color: #fff">0%</span></div>
+                            <div class="chart-bar-bg"><div class="chart-bar-fill" data-width="0%"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        const shapesContainer = document.querySelector('.animated-shapes');
+        const shapeCount = 60;
+
+        for (let i = 0; i < shapeCount; i++) {
+            const shape = document.createElement('div');
+            shape.classList.add('shape');
+            
+            shape.style.left = Math.random() * 100 + 'vw';
+            const size = Math.random() * 60 + 15;
+            shape.style.width = size + 'px';
+            shape.style.height = size + 'px';
+            
+            const duration = Math.random() * 20 + 10; 
+            shape.style.animationDuration = duration + 's';
+            shape.style.animationDelay = -(Math.random() * duration) + 's';
+
+            const isGoingUp = Math.random() > 0.5;
+            if (isGoingUp) {
+                shape.style.animationName = 'animateUp';
+                shape.style.bottom = '-150px';
+            } else {
+                shape.style.animationName = 'animateDown';
+                shape.style.top = '-150px';
+            }
+            
+            shapesContainer.appendChild(shape);
+        }
+
+        const cursor = document.querySelector('.cursor');
+        const cursorFollower = document.querySelector('.cursor-follower');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.transform = `translate(${e.clientX - 10}px, ${e.clientY - 10}px)`;
+            cursorFollower.style.transform = `translate(${e.clientX - 4}px, ${e.clientY - 4}px)`;
+        });
+
+        document.querySelectorAll('a, .flow-step, .stat-card').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursor.style.transform = `translate(${event.clientX - 10}px, ${event.clientY - 10}px) scale(1.5)`;
+            });
+            el.addEventListener('mouseleave', () => {
+                cursor.style.transform = `translate(${event.clientX - 10}px, ${event.clientY - 10}px) scale(1)`;
+            });
+        });
+
+        const observerOptions = {
+            threshold: 0.2
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const bars = entry.target.querySelectorAll('.chart-bar-fill[data-width]');
+                    bars.forEach(bar => {
+                        bar.style.width = bar.getAttribute('data-width');
+                    });
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.stat-card').forEach(card => {
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
