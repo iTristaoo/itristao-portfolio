@@ -4,25 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fluxo Bia - iTristao</title>
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="https://hqtzrdjnmzmeeytuwgfv.supabase.co/storage/v1/object/public/mee/favicon.png">
+    
     <style>
+        /* Reset básico */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            /* Garante que o cursor do sistema nunca apareça, mantendo apenas o nosso customizado */
+            cursor: none !important; 
         }
 
+        /* Estilo do Corpo */
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #0d0d0d;
+            background-color: #0d0d0d;
             color: #e0e0e0;
             line-height: 1.6;
-            cursor: none;
             overflow-x: hidden;
-            position: relative; /* Necessário para o z-index dos shapes funcionar bem */
+            min-height: 100vh;
         }
 
-        /* Background animado (mesmo estilo da home) */
+        /* Background animado (Radial Gradient) */
         body::before {
             content: '';
             position: fixed;
@@ -32,6 +37,7 @@
             height: 100%;
             background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
             pointer-events: none;
+            z-index: 0;
             animation: pulse 8s ease-in-out infinite;
         }
 
@@ -40,6 +46,7 @@
             50% { opacity: 0.6; }
         }
 
+        /* Cursores */
         .cursor {
             width: 20px;
             height: 20px;
@@ -64,14 +71,16 @@
             mix-blend-mode: difference;
         }
 
+        /* Container Principal */
         .container {
             max-width: 900px;
             margin: 0 auto;
             padding: 80px 30px;
             position: relative;
-            z-index: 1; /* Garante que o conteúdo fique acima dos shapes */
+            z-index: 2;
         }
 
+        /* Link de Voltar */
         .back-link {
             display: inline-block;
             margin-bottom: 40px;
@@ -100,7 +109,7 @@
             max-width: 700px;
         }
 
-        /* Flow Styles */
+        /* Estilos do Fluxo */
         .flow-container {
             position: relative;
             padding-left: 40px;
@@ -135,7 +144,7 @@
         .flow-step::before {
             content: '';
             position: absolute;
-            left: -44px; /* Ajuste para centralizar na linha */
+            left: -44px;
             top: 8px;
             width: 10px;
             height: 10px;
@@ -184,17 +193,17 @@
             margin-top: 10px;
         }
         
-        /* Highlight specific words */
         .highlight {
             color: #fff;
             font-weight: 500;
         }
 
-        /* --- NEW IMPACT SECTION STYLES --- */
+        /* Seção de Impacto e Gráficos */
         .impact-section {
             padding-top: 50px;
             border-top: 1px solid #1a1a1a;
             margin-bottom: 80px;
+            text-align: center;
         }
 
         .impact-title {
@@ -202,12 +211,16 @@
             color: #fff;
             margin-bottom: 40px;
             font-weight: 500;
+            display: inline-block;
         }
 
+        /* --- CORREÇÃO DE CENTRALIZAÇÃO DO CARD --- */
         .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            display: flex; /* Mudamos de Grid para Flex */
+            flex-wrap: wrap; /* Permite quebra de linha */
+            justify-content: center; /* Centraliza os itens horizontalmente */
             gap: 30px;
+            text-align: center; 
         }
 
         .stat-card {
@@ -218,7 +231,14 @@
             transition: transform 0.3s, border-color 0.3s, background 0.3s;
             display: flex;
             flex-direction: column;
+            align-items: stretch; 
+            
+            /* Define largura flexível com limite para não esticar demais */
+            flex: 1 1 300px;
+            max-width: 450px;
+            width: 100%;
         }
+        /* ------------------------------------------ */
 
         .stat-card:hover {
             transform: translateY(-5px);
@@ -239,11 +259,14 @@
             margin-bottom: 30px;
             line-height: 1.5;
             flex-grow: 1;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 90%; 
         }
 
-        /* Chart Styles */
         .chart-container {
             margin-top: auto;
+            width: 100%;
         }
 
         .chart-row {
@@ -276,7 +299,7 @@
         .chart-bar-fill {
             height: 100%;
             background: #444;
-            width: 0; /* Animated via JS */
+            width: 0;
             border-radius: 2px;
             transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
         }
@@ -286,7 +309,7 @@
             box-shadow: 0 0 10px rgba(255,255,255,0.4);
         }
 
-        /* ANIMATED SHAPES CSS (Adicionado da Home) */
+        /* Animação dos Blocos Caindo */
         .animated-shapes {
             position: fixed;
             top: 0;
@@ -294,7 +317,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            z-index: -1; /* Atrás de tudo */
+            z-index: 1;
             pointer-events: none;
         }
 
@@ -312,7 +335,6 @@
             animation-timing-function: linear;
         }
 
-        /* Animation for falling down */
         @keyframes animateDown {
             0% { transform: translateY(-150px) rotate(0deg); opacity: 0; }
             10% { opacity: 0.15; }
@@ -320,7 +342,6 @@
             100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
         }
 
-        /* Animation for rising up */
         @keyframes animateUp {
             0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
             10% { opacity: 0.15; }
@@ -328,13 +349,22 @@
             100% { transform: translateY(-150px) rotate(360deg); opacity: 0; }
         }
 
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .container {
+                padding: 50px 20px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="cursor"></div>
     <div class="cursor-follower"></div>
 
-    <!-- Container vazio para ser preenchido pelo JS (Adicionado da Home) -->
+    <!-- Container dos blocos animados -->
     <div class="animated-shapes"></div>
 
     <div class="container">
@@ -347,7 +377,6 @@
 
         <div class="flow-container">
             
-            <!-- Step 1 -->
             <div class="flow-step" style="animation-delay: 0.1s;">
                 <div class="step-title">1. Entrada e Captura</div>
                 <div class="step-content">
@@ -358,7 +387,6 @@
                 </div>
             </div>
 
-            <!-- Step 2 -->
             <div class="flow-step" style="animation-delay: 0.3s;">
                 <div class="step-title">2. Identificação e Contexto</div>
                 <div class="step-content">
@@ -369,7 +397,6 @@
                 </div>
             </div>
 
-            <!-- Step 3 -->
             <div class="flow-step" style="animation-delay: 0.5s;">
                 <div class="step-title">3. Agente de IA (Cérebro)</div>
                 <div class="step-content">
@@ -385,7 +412,6 @@
                 </div>
             </div>
 
-            <!-- Step 4 -->
             <div class="flow-step" style="animation-delay: 0.7s;">
                 <div class="step-title">4. Tratamento de Objeções</div>
                 <div class="step-content">
@@ -396,7 +422,6 @@
                 </div>
             </div>
 
-            <!-- Step 5 -->
             <div class="flow-step" style="animation-delay: 0.9s;">
                 <div class="step-title">5. Ação e Saída</div>
                 <div class="step-content">
@@ -413,13 +438,11 @@
 
         </div>
 
-        <!-- IMPACT SECTION -->
         <section class="impact-section">
             <h2 class="impact-title">Soluções e Impacto na Clínica</h2>
             
             <div class="stats-grid">
                 
-                <!-- Card 1: Disponibilidade -->
                 <div class="stat-card">
                     <div class="stat-name">Cobertura de Atendimento</div>
                     <div class="stat-desc">
@@ -437,7 +460,6 @@
                     </div>
                 </div>
 
-                <!-- Card 2: Tempo de Resposta -->
                 <div class="stat-card">
                     <div class="stat-name">Velocidade de Resposta</div>
                     <div class="stat-desc">
@@ -459,7 +481,6 @@
                     </div>
                 </div>
 
-                <!-- Card 3: Custo Operacional -->
                 <div class="stat-card">
                     <div class="stat-name">Escalabilidade</div>
                     <div class="stat-desc">
@@ -483,67 +504,57 @@
     </div>
 
     <script>
-        // GERADOR DE BLOCOS ANIMADOS (Mesma lógica da Home)
+        // GERADOR DE BLOCOS ANIMADOS
         const shapesContainer = document.querySelector('.animated-shapes');
-        const shapeCount = 60; // Quantidade de blocos
+        if (shapesContainer) {
+            const shapeCount = 60;
 
-        for (let i = 0; i < shapeCount; i++) {
-            const shape = document.createElement('div');
-            shape.classList.add('shape');
-            
-            // Posição horizontal aleatória
-            shape.style.left = Math.random() * 100 + 'vw';
-            
-            // Tamanho aleatório (variando um pouco mais)
-            const size = Math.random() * 60 + 15;
-            shape.style.width = size + 'px';
-            shape.style.height = size + 'px';
-            
-            // Duração aleatória
-            const duration = Math.random() * 20 + 10; 
-            shape.style.animationDuration = duration + 's';
-            
-            // Delay Negativo para loop infinito
-            shape.style.animationDelay = -(Math.random() * duration) + 's';
+            for (let i = 0; i < shapeCount; i++) {
+                const shape = document.createElement('div');
+                shape.classList.add('shape');
+                
+                shape.style.left = Math.random() * 100 + 'vw';
+                const size = Math.random() * 60 + 15;
+                shape.style.width = size + 'px';
+                shape.style.height = size + 'px';
+                const duration = Math.random() * 20 + 10; 
+                shape.style.animationDuration = duration + 's';
+                shape.style.animationDelay = -(Math.random() * duration) + 's';
 
-            // DIREÇÃO ALEATÓRIA
-            const isGoingUp = Math.random() > 0.5;
-
-            if (isGoingUp) {
-                shape.style.animationName = 'animateUp';
-                shape.style.bottom = '-150px';
-            } else {
-                shape.style.animationName = 'animateDown';
-                shape.style.top = '-150px';
+                const isGoingUp = Math.random() > 0.5;
+                if (isGoingUp) {
+                    shape.style.animationName = 'animateUp';
+                    shape.style.bottom = '-150px';
+                } else {
+                    shape.style.animationName = 'animateDown';
+                    shape.style.top = '-150px';
+                }
+                shapesContainer.appendChild(shape);
             }
-            
-            shapesContainer.appendChild(shape);
         }
 
-        // Cursor customizado (Replicado da Home)
+        // Cursores
         const cursor = document.querySelector('.cursor');
         const cursorFollower = document.querySelector('.cursor-follower');
 
-        document.addEventListener('mousemove', (e) => {
-            cursor.style.transform = `translate(${e.clientX - 10}px, ${e.clientY - 10}px)`;
-            cursorFollower.style.transform = `translate(${e.clientX - 4}px, ${e.clientY - 4}px)`;
-        });
-
-        // Efeito hover nos links e steps
-        document.querySelectorAll('a, .flow-step, .stat-card').forEach(el => {
-            el.addEventListener('mouseenter', () => {
-                cursor.style.transform = `translate(${event.clientX - 10}px, ${event.clientY - 10}px) scale(1.5)`;
+        if (cursor && cursorFollower) {
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.transform = `translate(${e.clientX - 10}px, ${e.clientY - 10}px)`;
+                cursorFollower.style.transform = `translate(${e.clientX - 4}px, ${e.clientY - 4}px)`;
             });
-            el.addEventListener('mouseleave', () => {
-                cursor.style.transform = `translate(${event.clientX - 10}px, ${event.clientY - 10}px) scale(1)`;
+
+            document.querySelectorAll('a, .flow-step, .stat-card').forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    cursor.style.transform = `translate(${event.clientX - 10}px, ${event.clientY - 10}px) scale(1.5)`;
+                });
+                el.addEventListener('mouseleave', () => {
+                    cursor.style.transform = `translate(${event.clientX - 10}px, ${event.clientY - 10}px) scale(1)`;
+                });
             });
-        });
+        }
 
-        // Animação dos Gráficos ao rolar a página
-        const observerOptions = {
-            threshold: 0.2
-        };
-
+        // Animação dos Gráficos
+        const observerOptions = { threshold: 0.2 };
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -551,7 +562,7 @@
                     bars.forEach(bar => {
                         bar.style.width = bar.getAttribute('data-width');
                     });
-                    observer.unobserve(entry.target); // Animar apenas uma vez
+                    observer.unobserve(entry.target);
                 }
             });
         }, observerOptions);
