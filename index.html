@@ -10,6 +10,8 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            /* Garante que o cursor do sistema nunca apareça */
+            cursor: none !important;
         }
 
         body {
@@ -17,7 +19,6 @@
             background: #0d0d0d;
             color: #e0e0e0;
             line-height: 1.6;
-            cursor: none;
             position: relative;
             overflow-x: hidden;
         }
@@ -98,7 +99,7 @@
             opacity: 0;
             animation: fadeInUp 0.8s ease forwards;
             position: relative;
-            cursor: pointer;
+            cursor: none !important; /* Reforço para o título */
             transition: letter-spacing 0.3s ease;
         }
 
@@ -352,7 +353,7 @@
             border-radius: 50%;
             background: #333;
             transition: all 0.3s ease;
-            cursor: pointer;
+            cursor: none !important; /* Reforço */
         }
 
         .scroll-dot.active {
