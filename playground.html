@@ -192,6 +192,8 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
+            /* Garante que o painel não estoure a largura no mobile */
+            max-width: 100%;
         }
 
         .workflow-canvas {
@@ -414,12 +416,60 @@
             100% { transform: translateY(-150px) rotate(360deg); opacity: 0; }
         }
 
+        /* --- RESPONSIVIDADE MOBILE --- */
         @media (max-width: 900px) {
+            body {
+                /* Restaura o cursor padrão no mobile */
+                cursor: auto !important; 
+            }
+            .cursor, .cursor-follower {
+                /* Esconde o cursor customizado em telas touch */
+                display: none !important;
+            }
+
             .playground-wrapper {
                 grid-template-columns: 1fr;
             }
             .chat-panel {
                 height: 300px;
+            }
+            .container {
+                padding: 40px 15px;
+            }
+            
+            /* Ajusta links e botões para terem ponteiro normal */
+            .back-link, .btn {
+                cursor: pointer;
+            }
+            
+            /* Permite scroll horizontal no canvas para ver todo o diagrama */
+            .workflow-canvas {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* Cria uma área virtual para garantir que o scroll cubra todos os nós */
+            .workflow-canvas::before {
+                content: '';
+                display: block;
+                width: 650px; /* Largura suficiente para cobrir os nós mais distantes */
+                height: 1px;
+                position: absolute;
+                top: 0; left: 0;
+            }
+            
+            .controls-bar {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+            
+            .btn-group {
+                justify-content: center;
+            }
+            
+            .status-text {
+                text-align: center;
             }
         }
     </style>
@@ -491,6 +541,7 @@
         const cursor = document.querySelector('.cursor');
         const cursorFollower = document.querySelector('.cursor-follower');
         
+        // Só adiciona evento se o cursor estiver visível (desktop)
         document.addEventListener('mousemove', (e) => {
             cursor.style.transform = `translate(${e.clientX - 10}px, ${e.clientY - 10}px)`;
             cursorFollower.style.transform = `translate(${e.clientX - 4}px, ${e.clientY - 4}px)`;
@@ -694,5 +745,4 @@
         }
     </script>
 </body>
-
 </html>
