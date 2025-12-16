@@ -10,6 +10,8 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            /* Garante que o cursor do sistema nunca apareça globalmente */
+            cursor: none !important; 
         }
 
         body {
@@ -17,9 +19,14 @@
             background: #0d0d0d;
             color: #e0e0e0;
             line-height: 1.6;
-            cursor: none;
+            cursor: none !important;
             overflow-x: hidden;
             position: relative;
+        }
+
+        /* Força cursor invisível em todos os links */
+        a {
+            cursor: none !important;
         }
 
         body::before {
@@ -45,6 +52,8 @@
             border: 1px solid #fff;
             border-radius: 50%;
             position: fixed;
+            top: 0;
+            left: 0;
             pointer-events: none;
             z-index: 9999;
             transition: transform 0.15s ease;
@@ -57,6 +66,8 @@
             background: #fff;
             border-radius: 50%;
             position: fixed;
+            top: 0;
+            left: 0;
             pointer-events: none;
             z-index: 9999;
             transition: transform 0.1s ease;
@@ -78,6 +89,7 @@
             text-decoration: none;
             font-size: 0.9em;
             transition: color 0.3s ease;
+            cursor: none !important; /* Reforço específico para este elemento */
         }
 
         .back-link:hover {
@@ -193,13 +205,12 @@
             margin-bottom: 80px;
         }
 
-        /* TÍTULO CENTRALIZADO */
         .impact-title {
             font-size: 1.8em;
             color: #fff;
             margin-bottom: 40px;
             font-weight: 500;
-            text-align: center; /* Adicionado para centralizar o título */
+            text-align: center;
         }
 
         .stats-grid {
@@ -516,7 +527,8 @@
             cursorFollower.style.transform = `translate(${e.clientX - 4}px, ${e.clientY - 4}px)`;
         });
 
-        document.querySelectorAll('a, .flow-step, .stat-card').forEach(el => {
+        // ADICIONEI .back-link E a NO SELETOR PARA EFEITO DE HOVER
+        document.querySelectorAll('a, .flow-step, .stat-card, .back-link').forEach(el => {
             el.addEventListener('mouseenter', () => {
                 cursor.style.transform = `translate(${event.clientX - 10}px, ${event.clientY - 10}px) scale(1.5)`;
             });
