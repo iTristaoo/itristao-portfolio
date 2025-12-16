@@ -502,7 +502,6 @@
             <h2 class="section-title">Projetos</h2>
             
             <div class="work-item">
-                <!-- LINK PARA A PÁGINA DA BIA -->
                 <h3>
                     <a href="bia.html" style="text-decoration: none; color: inherit;">
                         Bia - Atendente IA Completa para Clínicas
@@ -523,7 +522,12 @@
             </div>
 
             <div class="work-item">
-                <h3>Sistema de Agendamento Inteligente para Clínicas</h3>
+                <!-- LINK ATUALIZADO AQUI -->
+                <h3>
+                    <a href="tool-agendamento.html" style="text-decoration: none; color: inherit;">
+                        Sistema de Agendamento Inteligente para Clínicas
+                    </a>
+                </h3>
                 <p>Workflow avançado de agendamento que gerencia múltiplos profissionais, verifica disponibilidade em tempo real, previne conflitos de horário e mantém sincronização com GoHighLevel. Inclui lógica de reagendamento automático, cancelamento e validação de slots livres com buffer de 30 minutos entre consultas.</p>
                 <div class="tags">
                     <span class="tag">n8n</span>
@@ -681,83 +685,4 @@
         // Efeito hover nos links e elementos interativos
         document.querySelectorAll('a, .tag, .image-box').forEach(el => {
             el.addEventListener('mouseenter', () => {
-                cursor.style.transform = `translate(${event.clientX - 10}px, ${event.clientY - 10}px) scale(1.5)`;
-            });
-            el.addEventListener('mouseleave', () => {
-                cursor.style.transform = `translate(${event.clientX - 10}px, ${event.clientY - 10}px) scale(1)`;
-            });
-        });
-
-        // Parallax suave nas imagens
-        document.querySelectorAll('.image-box').forEach((box, index) => {
-            box.addEventListener('mousemove', (e) => {
-                const rect = box.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                
-                const deltaX = (x - centerX) / centerX;
-                const deltaY = (y - centerY) / centerY;
-                
-                const img = box.querySelector('img');
-                if (img) {
-                    img.style.transform = `scale(1.1) translate(${deltaX * 5}px, ${deltaY * 5}px)`;
-                }
-            });
-            
-            box.addEventListener('mouseleave', () => {
-                const img = box.querySelector('img');
-                if (img) {
-                    img.style.transform = 'scale(1) translate(0, 0)';
-                }
-            });
-        });
-
-        // Scroll indicator
-        const sections = ['header', 'projetos', 'casos', 'servicos', 'contato'];
-        const dots = document.querySelectorAll('.scroll-dot');
-        const container = document.querySelector('.container');
-
-        // Atualiza indicador baseado no scroll
-        window.addEventListener('scroll', () => {
-            // Ativa borda do container ao scrollar
-            if (window.scrollY > 100) {
-                container.classList.add('scrolled');
-            } else {
-                container.classList.remove('scrolled');
-            }
-
-            let current = '';
-            sections.forEach(sectionId => {
-                const section = document.getElementById(sectionId);
-                if (section) {
-                    const rect = section.getBoundingClientRect();
-                    if (rect.top <= 100 && rect.bottom >= 100) {
-                        current = sectionId;
-                    }
-                }
-            });
-
-            dots.forEach(dot => {
-                dot.classList.remove('active');
-                if (dot.dataset.section === current) {
-                    dot.classList.add('active');
-                }
-            });
-        });
-
-        // Click nos dots para scroll suave
-        dots.forEach(dot => {
-            dot.addEventListener('click', () => {
-                const sectionId = dot.dataset.section;
-                const section = document.getElementById(sectionId);
-                if (section) {
-                    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            });
-        });
-    </script>
-</body>
-</html>
+                cursor.style.transform = `translate(${event.clientX -
