@@ -17,6 +17,25 @@
             color: #e0e0e0;
             line-height: 1.6;
             cursor: none;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
         }
 
         .cursor {
@@ -47,6 +66,22 @@
             max-width: 900px;
             margin: 0 auto;
             padding: 80px 30px;
+            position: relative;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2px;
+            height: 0;
+            background: linear-gradient(180deg, transparent, #333, transparent);
+            transition: height 1s ease;
+        }
+
+        .container.scrolled::before {
+            height: 100%;
         }
 
         header {
@@ -61,6 +96,13 @@
             letter-spacing: -1px;
             opacity: 0;
             animation: fadeInUp 0.8s ease forwards;
+            position: relative;
+            cursor: pointer;
+            transition: letter-spacing 0.3s ease;
+        }
+
+        h1:hover {
+            letter-spacing: 2px;
         }
 
         @keyframes fadeInUp {
@@ -94,17 +136,52 @@
             color: #666;
             margin-bottom: 30px;
             font-weight: 500;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .section-title::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 1px;
+            background: linear-gradient(90deg, #666, transparent);
+            transition: width 0.8s ease;
+        }
+
+        .section-title.visible::before {
+            width: 12px;
         }
 
         .work-item {
             margin-bottom: 40px;
             padding-bottom: 40px;
             border-bottom: 1px solid #1a1a1a;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            position: relative;
+        }
+
+        .work-item::before {
+            content: '';
+            position: absolute;
+            left: -30px;
+            top: 0;
+            width: 2px;
+            height: 0;
+            background: linear-gradient(180deg, #333, transparent);
+            transition: height 0.6s ease;
+        }
+
+        .work-item:hover::before {
+            height: 100%;
         }
 
         .work-item:hover {
             transform: translateX(10px);
+            border-color: #252525;
         }
 
         .work-item:last-child {
@@ -116,6 +193,28 @@
             color: #fff;
             margin-bottom: 10px;
             font-weight: 500;
+            transition: color 0.3s ease;
+            position: relative;
+            display: inline-block;
+        }
+
+        .work-item:hover h3 {
+            color: #f5f5f5;
+        }
+
+        .work-item h3::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: #333;
+            transition: width 0.4s ease;
+        }
+
+        .work-item:hover h3::after {
+            width: 100%;
         }
 
         .work-item p {
@@ -149,6 +248,7 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 15px;
             margin: 50px 0;
+            perspective: 1000px;
         }
 
         .image-box {
@@ -161,13 +261,24 @@
         }
 
         .image-box::after {
-            content: '📷';
+            content: '';
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 2em;
-            opacity: 0.3;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .image-box:hover::after {
+            opacity: 1;
+        }
+
+        .image-box:hover {
+            transform: translateY(-5px) scale(1.02);
         }
 
         .image-box img {
@@ -180,17 +291,9 @@
             z-index: 1;
         }
 
-        .image-box img.loaded {
-            opacity: 0.9;
-        }
-
-        .image-box:hover {
-            transform: scale(1.05);
-        }
-
         .image-box:hover img {
             opacity: 1;
-            transform: scale(1.1);
+            transform: scale(1.05);
         }
 
         .contact {
@@ -231,6 +334,35 @@
             width: 100%;
         }
 
+        .scroll-indicator {
+            position: fixed;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .scroll-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #333;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .scroll-dot.active {
+            background: #666;
+            transform: scale(1.5);
+        }
+
+        .scroll-dot:hover {
+            background: #555;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 50px 20px;
@@ -247,6 +379,10 @@
             .images {
                 grid-template-columns: 1fr;
             }
+
+            .scroll-indicator {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -254,8 +390,16 @@
     <div class="cursor"></div>
     <div class="cursor-follower"></div>
     
+    <div class="scroll-indicator">
+        <div class="scroll-dot" data-section="header"></div>
+        <div class="scroll-dot" data-section="projetos"></div>
+        <div class="scroll-dot" data-section="casos"></div>
+        <div class="scroll-dot" data-section="servicos"></div>
+        <div class="scroll-dot" data-section="contato"></div>
+    </div>
+    
     <div class="container">
-        <header>
+        <header id="header">
             <h1>iTristao</h1>
             <p class="intro">
                 Trabalho com automação e inteligência artificial. Crio soluções que conectam sistemas, 
@@ -275,7 +419,7 @@
             </div>
         </div>
 
-        <section class="section">
+        <section class="section" id="projetos">
             <h2 class="section-title">Projetos</h2>
             
             <div class="work-item">
@@ -291,6 +435,19 @@
                     <span class="tag">PostgreSQL</span>
                     <span class="tag">WhatsApp API</span>
                     <span class="tag">RAG</span>
+                </div>
+            </div>
+
+            <div class="work-item">
+                <h3>Sistema de Agendamento Inteligente para Clínicas</h3>
+                <p>Workflow avançado de agendamento que gerencia múltiplos profissionais, verifica disponibilidade em tempo real, previne conflitos de horário e mantém sincronização com GoHighLevel. Inclui lógica de reagendamento automático, cancelamento e validação de slots livres com buffer de 30 minutos entre consultas.</p>
+                <div class="tags">
+                    <span class="tag">n8n</span>
+                    <span class="tag">GoHighLevel API</span>
+                    <span class="tag">Calendar Management</span>
+                    <span class="tag">Supabase</span>
+                    <span class="tag">Webhooks</span>
+                    <span class="tag">Date Logic</span>
                 </div>
             </div>
 
@@ -321,7 +478,26 @@
             </div>
         </section>
 
-        <section class="section">
+        <section class="section" id="casos">
+            <h2 class="section-title">Casos de Uso</h2>
+            
+            <div class="work-item">
+                <h3>Atendimento Humanizado com IA</h3>
+                <p>Cliente envia mensagem no WhatsApp → Sistema aguarda 12 segundos para agrupar mensagens múltiplas → IA processa texto, transcreve áudios ou analisa imagens → Consulta memória de conversas anteriores e base de conhecimento (RAG) → Responde de forma natural, dividindo texto em mensagens curtas e gerando áudios quando apropriado → Marca como lida e registra interação.</p>
+            </div>
+
+            <div class="work-item">
+                <h3>Agendamento Inteligente Multi-Profissional</h3>
+                <p>Cliente solicita agendamento → Sistema identifica o profissional desejado (Dr. Felipe ou Dra. Gabriela) → Consulta disponibilidade no calendário do GoHighLevel → Valida se há conflito de horários e aplica buffer de 30 minutos → Verifica se cliente já tem agendamento ativo → Cria novo agendamento ou oferece reagendamento → Atualiza pipeline do CRM e envia confirmação.</p>
+            </div>
+
+            <div class="work-item">
+                <h3>Reagendamento Sem Conflitos</h3>
+                <p>Cliente solicita mudança de horário → Sistema localiza agendamento existente por email ou contact ID → Verifica disponibilidade do novo horário → Cancela agendamento antigo automaticamente → Cria novo agendamento com as mesmas informações → Atualiza registro no Supabase com novo Event ID → Move lead para etapa "Consulta Marcada" no pipeline.</p>
+            </div>
+        </section>
+
+        <section class="section" id="servicos">
             <h2 class="section-title">O que faço</h2>
             
             <div class="work-item">
@@ -365,7 +541,7 @@
             </div>
         </section>
 
-        <section class="contact">
+        <section class="contact" id="contato">
             <h2 class="section-title">Contato</h2>
             <p>Se você tem um projeto ou quer trocar uma ideia sobre automação e IA, é só chamar.</p>
             <p>Discord: <a href="#">itristao</a></p>
@@ -403,6 +579,11 @@
                 if (entry.isIntersecting) {
                     entry.target.style.opacity = '1';
                     entry.target.style.transform = 'translateY(0)';
+                    
+                    // Adiciona classe visible para section-title
+                    if (entry.target.classList.contains('section-title')) {
+                        entry.target.classList.add('visible');
+                    }
                 }
             });
         }, observerOptions);
@@ -421,6 +602,77 @@
             });
             el.addEventListener('mouseleave', () => {
                 cursor.style.transform = `translate(${event.clientX - 10}px, ${event.clientY - 10}px) scale(1)`;
+            });
+        });
+
+        // Parallax suave nas imagens
+        document.querySelectorAll('.image-box').forEach((box, index) => {
+            box.addEventListener('mousemove', (e) => {
+                const rect = box.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const deltaX = (x - centerX) / centerX;
+                const deltaY = (y - centerY) / centerY;
+                
+                const img = box.querySelector('img');
+                if (img) {
+                    img.style.transform = `scale(1.1) translate(${deltaX * 5}px, ${deltaY * 5}px)`;
+                }
+            });
+            
+            box.addEventListener('mouseleave', () => {
+                const img = box.querySelector('img');
+                if (img) {
+                    img.style.transform = 'scale(1) translate(0, 0)';
+                }
+            });
+        });
+
+        // Scroll indicator
+        const sections = ['header', 'projetos', 'casos', 'servicos', 'contato'];
+        const dots = document.querySelectorAll('.scroll-dot');
+        const container = document.querySelector('.container');
+
+        // Atualiza indicador baseado no scroll
+        window.addEventListener('scroll', () => {
+            // Ativa borda do container ao scrollar
+            if (window.scrollY > 100) {
+                container.classList.add('scrolled');
+            } else {
+                container.classList.remove('scrolled');
+            }
+
+            let current = '';
+            sections.forEach(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    const rect = section.getBoundingClientRect();
+                    if (rect.top <= 100 && rect.bottom >= 100) {
+                        current = sectionId;
+                    }
+                }
+            });
+
+            dots.forEach(dot => {
+                dot.classList.remove('active');
+                if (dot.dataset.section === current) {
+                    dot.classList.add('active');
+                }
+            });
+        });
+
+        // Click nos dots para scroll suave
+        dots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                const sectionId = dot.dataset.section;
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
             });
         });
     </script>
