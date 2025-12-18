@@ -3,26 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iTristao</title>
+    <meta name="description" content="iTristao - Automação inteligente, IA e integração de sistemas para otimizar seus processos de negócios.">
+    <title>iTristao - Automação e Inteligência Artificial</title>
     <link rel="icon" type="image/png" href="https://hqtzrdjnmzmeeytuwgfv.supabase.co/storage/v1/object/public/mee/favicon.png">
     <style>
+        :root {
+            --primary: #4facfe;
+            --purple-accent: #9d4edd; /* Cor roxa para destaque */
+            --bg: #0d0d0d;
+            --surface: #111;
+            --border: #222;
+            --text-main: #e0e0e0;
+            --text-muted: #888;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            /* Garante que o cursor do sistema nunca apareça */
-            cursor: none !important;
+            cursor: none; /* Cursor customizado por padrão no Desktop */
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #0d0d0d;
-            color: #e0e0e0;
+            background: var(--bg);
+            color: var(--text-main);
             line-height: 1.6;
             position: relative;
             overflow-x: hidden;
         }
 
+        /* SCROLL PROGRESS INDICATOR */
+        .scroll-progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.05);
+            z-index: 10006; /* Acima de tudo, inclusive do cursor */
+        }
+
+        .scroll-progress-bar {
+            height: 100%;
+            /* MUDANÇA: Gradiente Roxo */
+            background: linear-gradient(90deg, #8e2de2, #4a00e0);
+            width: 0%;
+            box-shadow: 0 0 10px rgba(138, 45, 226, 0.7);
+            transition: width 0.1s;
+        }
+
+        /* BACK TO TOP BUTTON */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 45px;
+            height: 45px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.2em;
+            cursor: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 9990;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            background: #333;
+            border-color: var(--purple-accent);
+            transform: translateY(-3px);
+            color: var(--purple-accent);
+        }
+
+        /* NAVBAR */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px 30px;
+            background: rgba(13, 13, 13, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10000;
+            transition: transform 0.3s ease;
+        }
+
+        .navbar.hidden {
+            transform: translateY(-100%);
+        }
+
+        .nav-logo {
+            font-weight: 700;
+            font-size: 1.2em;
+            color: #fff;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+            z-index: 10002;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: #fff;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--purple-accent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* MOBILE MENU TOGGLE */
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            cursor: none;
+            z-index: 10002;
+            width: 30px;
+        }
+
+        .bar {
+            width: 100%;
+            height: 2px;
+            background: #fff;
+            transition: 0.3s ease;
+        }
+
+        /* FUNDO IGUAL */
         body::before {
             content: '';
             position: fixed;
@@ -33,6 +184,7 @@
             background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
             pointer-events: none;
             animation: pulse 8s ease-in-out infinite;
+            z-index: -2;
         }
 
         @keyframes pulse {
@@ -40,6 +192,7 @@
             50% { opacity: 0.6; }
         }
 
+        /* CORREÇÃO DO CURSOR */
         .cursor {
             width: 20px;
             height: 20px;
@@ -49,7 +202,8 @@
             top: 0;
             left: 0;
             pointer-events: none;
-            z-index: 9999;
+            /* MUDANÇA: Z-Index maior que o da Navbar (10000) */
+            z-index: 10005; 
             transition: transform 0.15s ease;
             mix-blend-mode: difference;
         }
@@ -63,7 +217,8 @@
             top: 0;
             left: 0;
             pointer-events: none;
-            z-index: 9999;
+            /* MUDANÇA: Z-Index maior que o da Navbar (10000) */
+            z-index: 10005;
             transition: transform 0.1s ease;
             mix-blend-mode: difference;
         }
@@ -71,7 +226,7 @@
         .container {
             max-width: 900px;
             margin: 0 auto;
-            padding: 80px 30px;
+            padding: 140px 30px 80px;
             position: relative;
         }
 
@@ -103,7 +258,6 @@
             opacity: 0;
             animation: fadeInUp 0.8s ease forwards;
             position: relative;
-            cursor: none !important; /* Reforço para o título */
             transition: letter-spacing 0.3s ease;
         }
 
@@ -132,7 +286,8 @@
         }
 
         .section {
-            margin-bottom: 80px;
+            margin-bottom: 100px;
+            scroll-margin-top: 100px; /* Para o smooth scroll não cobrir o título */
         }
 
         .section-title {
@@ -302,8 +457,66 @@
             transform: scale(1.05);
         }
 
+        /* FAQ SECTION */
+        .faq-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .faq-item {
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: border-color 0.3s;
+        }
+
+        .faq-item:hover {
+            border-color: #333;
+        }
+
+        .faq-question {
+            padding: 20px;
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1em;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-question::after {
+            content: '+';
+            font-size: 1.2em;
+            color: #666;
+            transition: transform 0.3s;
+        }
+
+        .faq-item.active .faq-question::after {
+            transform: rotate(45deg);
+            color: var(--purple-accent);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            padding: 0 20px;
+            color: #888;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .faq-item.active .faq-answer {
+            padding-bottom: 20px;
+        }
+
         .contact {
-            margin-top: 100px;
+            margin-top: 50px;
             padding-top: 40px;
             border-top: 1px solid #1a1a1a;
         }
@@ -321,23 +534,8 @@
             position: relative;
         }
 
-        .contact a::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            width: 0;
-            height: 1px;
-            background: #fff;
-            transition: width 0.3s ease;
-        }
-
         .contact a:hover {
             border-color: #666;
-        }
-
-        .contact a:hover::after {
-            width: 100%;
         }
 
         .scroll-indicator {
@@ -357,7 +555,6 @@
             border-radius: 50%;
             background: #333;
             transition: all 0.3s ease;
-            cursor: none !important; /* Reforço */
         }
 
         .scroll-dot.active {
@@ -384,7 +581,6 @@
         .shape {
             position: absolute;
             display: block;
-            list-style: none;
             width: 20px;
             height: 20px;
             background: rgba(255, 255, 255, 0.2);
@@ -395,7 +591,6 @@
             animation-timing-function: linear;
         }
 
-        /* Animation for falling down */
         @keyframes animateDown {
             0% { transform: translateY(-150px) rotate(0deg); opacity: 0; }
             10% { opacity: 0.15; }
@@ -403,7 +598,6 @@
             100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
         }
 
-        /* Animation for rising up */
         @keyframes animateUp {
             0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
             10% { opacity: 0.15; }
@@ -411,9 +605,68 @@
             100% { transform: translateY(-150px) rotate(360deg); opacity: 0; }
         }
 
-        @media (max-width: 768px) {
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 900px) {
+            * {
+                cursor: auto !important; /* Desativa cursor customizado */
+            }
+            .cursor, .cursor-follower {
+                display: none !important;
+            }
+            
+            .navbar {
+                padding: 15px 20px;
+            }
+
+            .menu-toggle {
+                display: flex;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 100%;
+                height: 100vh;
+                background: #0d0d0d;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                gap: 40px;
+                transform: translateX(100%);
+                transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                z-index: 10001;
+            }
+
+            .nav-links.active {
+                transform: translateX(0);
+            }
+
+            .nav-link {
+                font-size: 1.5em;
+                opacity: 0;
+                transform: translateY(20px);
+                transition: 0.3s ease;
+            }
+
+            .nav-links.active .nav-link {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            /* Animação do Hamburger */
+            .menu-toggle.active .bar:nth-child(1) {
+                transform: rotate(45deg) translate(5px, 6px);
+            }
+            .menu-toggle.active .bar:nth-child(2) {
+                opacity: 0;
+            }
+            .menu-toggle.active .bar:nth-child(3) {
+                transform: rotate(-45deg) translate(5px, -6px);
+            }
+
             .container {
-                padding: 50px 20px;
+                padding: 100px 20px 40px;
             }
 
             h1 {
@@ -438,20 +691,47 @@
     <div class="cursor"></div>
     <div class="cursor-follower"></div>
 
-    <!-- Container para blocos animados -->
+    <!-- Scroll Progress Bar -->
+    <div class="scroll-progress-container">
+        <div class="scroll-progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Animated Background -->
     <div class="animated-shapes"></div>
     
+    <!-- Navbar com Hamburger -->
+    <nav class="navbar" id="navbar">
+        <a href="#" class="nav-logo">iTristao</a>
+        
+        <div class="menu-toggle" id="mobileMenuBtn">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </div>
+
+        <div class="nav-links" id="navLinks">
+            <a href="#projetos" class="nav-link">Projetos</a>
+            <a href="#casos" class="nav-link">Casos</a>
+            <a href="#servicos" class="nav-link">Serviços</a>
+            <a href="#experimente" class="nav-link">Playground</a>
+            <a href="#faq" class="nav-link">FAQ</a>
+            <a href="#contato" class="nav-link">Contato</a>
+        </div>
+    </nav>
+    
+    <!-- Side Dots (Desktop Only) -->
     <div class="scroll-indicator">
         <div class="scroll-dot" data-section="header"></div>
         <div class="scroll-dot" data-section="projetos"></div>
         <div class="scroll-dot" data-section="casos"></div>
         <div class="scroll-dot" data-section="servicos"></div>
-        <div class="scroll-dot" data-section="experimente"></div> <!-- NOVO DOT -->
+        <div class="scroll-dot" data-section="experimente"></div>
+        <div class="scroll-dot" data-section="faq"></div>
         <div class="scroll-dot" data-section="contato"></div>
     </div>
 
     <script>
-        // GERADOR DE BLOCOS ANIMADOS (Mesma lógica da Bia)
+        // GERADOR DE BLOCOS ANIMADOS
         const shapesContainer = document.querySelector('.animated-shapes');
         const shapeCount = 60;
 
@@ -512,16 +792,12 @@
                         Bia - Atendente IA Completa para Clínicas
                     </a>
                 </h3>
-                <p>Sistema completo de atendimento automatizado via WhatsApp para clínicas de estética. A Bia conversa naturalmente processando texto, áudio e imagens, enquanto o MCP Server integrado ao GoHighLevel executa todas as ações: gerencia agendamentos com verificação de disponibilidade, movimenta leads no pipeline, consulta catálogo de tratamentos e envia prova social.</p>
+                <p>Sistema completo de atendimento automatizado via WhatsApp para clínicas de estética. A Bia conversa naturalmente processando texto, áudio e imagens, enquanto o MCP Server integrado executa todas as ações.</p>
                 <div class="tags">
                     <span class="tag">n8n</span>
                     <span class="tag">OpenAI</span>
                     <span class="tag">ElevenLabs</span>
-                    <span class="tag">MCP Server</span>
                     <span class="tag">GoHighLevel</span>
-                    <span class="tag">Supabase</span>
-                    <span class="tag">PostgreSQL</span>
-                    <span class="tag">WhatsApp API</span>
                     <span class="tag">RAG</span>
                 </div>
             </div>
@@ -529,43 +805,26 @@
             <div class="work-item">
                 <h3>
                     <a href="agendamento.html" style="text-decoration: none; color: inherit;">
-                        Sistema de Agendamento Inteligente para Clínicas
+                        Sistema de Agendamento Inteligente
                     </a>
                 </h3>
-                <p>Workflow avançado de agendamento que gerencia múltiplos profissionais, verifica disponibilidade em tempo real, previne conflitos de horário e mantém sincronização com GoHighLevel. Inclui lógica de reagendamento automático, cancelamento e validação de slots livres com buffer de 30 minutos entre consultas.</p>
+                <p>Workflow avançado de agendamento que gerencia múltiplos profissionais, verifica disponibilidade em tempo real, previne conflitos de horário e mantém sincronização com GoHighLevel.</p>
                 <div class="tags">
                     <span class="tag">n8n</span>
-                    <span class="tag">GoHighLevel API</span>
-                    <span class="tag">Calendar Management</span>
+                    <span class="tag">API</span>
                     <span class="tag">Supabase</span>
                     <span class="tag">Webhooks</span>
-                    <span class="tag">Date Logic</span>
                 </div>
             </div>
 
             <div class="work-item">
-                <h3>Hub de Qualificação de Leads para E-commerce</h3>
-                <p>Sistema automatizado que recebe leads de múltiplas fontes (Facebook Ads, Instagram, landing pages), qualifica através de IA analisando comportamento e intenção de compra, e distribui automaticamente para o time de vendas com scoring inteligente e notificações por email e WhatsApp.</p>
+                <h3>Hub de Qualificação de Leads</h3>
+                <p>Sistema automatizado que recebe leads de múltiplas fontes, qualifica através de IA analisando comportamento e intenção de compra, e distribui automaticamente para o time de vendas.</p>
                 <div class="tags">
                     <span class="tag">n8n</span>
                     <span class="tag">OpenAI</span>
-                    <span class="tag">Webhooks</span>
+                    <span class="tag">CRM</span>
                     <span class="tag">PostgreSQL</span>
-                    <span class="tag">WhatsApp API</span>
-                    <span class="tag">Email API</span>
-                </div>
-            </div>
-
-            <div class="work-item">
-                <h3>Assistente de Análise de Contratos</h3>
-                <p>Ferramenta que processa PDFs de contratos, extrai cláusulas importantes usando IA, identifica riscos e gera relatórios comparativos. Integrado com Google Drive para sincronização automática e Notion para documentação estruturada. Reduz tempo de análise de horas para minutos.</p>
-                <div class="tags">
-                    <span class="tag">n8n</span>
-                    <span class="tag">OpenAI</span>
-                    <span class="tag">PDF Processing</span>
-                    <span class="tag">Google Drive API</span>
-                    <span class="tag">Notion API</span>
-                    <span class="tag">RAG</span>
                 </div>
             </div>
         </section>
@@ -575,17 +834,12 @@
             
             <div class="work-item">
                 <h3>Atendimento Humanizado com IA</h3>
-                <p>Cliente envia mensagem no WhatsApp → Sistema aguarda 12 segundos para agrupar mensagens múltiplas → IA processa texto, transcreve áudios ou analisa imagens → Consulta memória de conversas anteriores e base de conhecimento (RAG) → Responde de forma natural, dividindo texto em mensagens curtas e gerando áudios quando apropriado → Marca como lida e registra interação.</p>
+                <p>Cliente envia mensagem no WhatsApp → Sistema aguarda para agrupar mensagens → IA processa texto/áudio → Consulta base de conhecimento → Responde naturalmente e registra interação.</p>
             </div>
 
             <div class="work-item">
-                <h3>Agendamento Inteligente Multi-Profissional</h3>
-                <p>Cliente solicita agendamento → Sistema identifica o profissional desejado (Dr. Felipe ou Dra. Gabriela) → Consulta disponibilidade no calendário do GoHighLevel → Valida se há conflito de horários e aplica buffer de 30 minutos → Verifica se cliente já tem agendamento ativo → Cria novo agendamento ou oferece reagendamento → Atualiza pipeline do CRM e envia confirmação.</p>
-            </div>
-
-            <div class="work-item">
-                <h3>Reagendamento Sem Conflitos</h3>
-                <p>Cliente solicita mudança de horário → Sistema localiza agendamento existente por email ou contact ID → Verifica disponibilidade do novo horário → Cancela agendamento antigo automaticamente → Cria novo agendamento com as mesmas informações → Atualiza registro no Supabase com novo Event ID → Move lead para etapa "Consulta Marcada" no pipeline.</p>
+                <h3>Agendamento Multi-Profissional</h3>
+                <p>Solicitação de agendamento → Identificação do profissional → Consulta disponibilidade (API) → Validação de conflitos → Criação do evento → Notificação automática.</p>
             </div>
         </section>
 
@@ -594,7 +848,7 @@
             
             <div class="work-item">
                 <h3>Automação de Processos</h3>
-                <p>Construo workflows com n8n para automatizar tarefas repetitivas, integrar diferentes ferramentas e otimizar operações. Do simples ao complexo.</p>
+                <p>Construo workflows com n8n para automatizar tarefas repetitivas e integrar ferramentas.</p>
                 <div class="tags">
                     <span class="tag">n8n</span>
                     <span class="tag">Webhooks</span>
@@ -604,44 +858,59 @@
 
             <div class="work-item">
                 <h3>Soluções com IA</h3>
-                <p>Implemento sistemas inteligentes que usam IA para processar dados, gerar insights e automatizar decisões.</p>
+                <p>Sistemas inteligentes que usam IA para processar dados, gerar insights e automatizar decisões.</p>
                 <div class="tags">
-                    <span class="tag">Machine Learning</span>
-                    <span class="tag">NLP</span>
+                    <span class="tag">LLMs</span>
+                    <span class="tag">Agents</span>
                     <span class="tag">Chatbots</span>
                 </div>
             </div>
 
             <div class="work-item">
                 <h3>APIs e Integrações</h3>
-                <p>Conecto sistemas diferentes através de APIs. REST, GraphQL, autenticação, webhooks — tudo que for necessário para fazer as coisas conversarem.</p>
+                <p>Conecto sistemas diferentes através de APIs REST, GraphQL e autenticação complexa.</p>
                 <div class="tags">
                     <span class="tag">REST</span>
                     <span class="tag">GraphQL</span>
                     <span class="tag">OAuth</span>
                 </div>
             </div>
-
-            <div class="work-item">
-                <h3>Banco de Dados</h3>
-                <p>Experiência com PostgreSQL e outros bancos. Modelagem, queries otimizadas e arquitetura de dados.</p>
-                <div class="tags">
-                    <span class="tag">PostgreSQL</span>
-                    <span class="tag">SQL</span>
-                    <span class="tag">Database Design</span>
-                </div>
-            </div>
         </section>
 
-        <!-- NOVA SEÇÃO EXPERIMENTE -->
         <section class="section" id="experimente">
             <h2 class="section-title">Experimente</h2>
             
             <div class="work-item">
                 <h3>Playground Interativo</h3>
                 <p>Quer ver como funciona na prática? Acesse o playground interativo e execute um workflow simulado. Veja os dados fluindo em tempo real.</p>
+                <!-- MUDANÇA: Link Roxo -->
                 <div style="margin-top: 20px;">
                     <a href="playground.html" style="color: #9d4edd; text-decoration: none; border-bottom: 1px solid #9d4edd; transition: all 0.3s; padding-bottom: 2px;">🎮 Acessar Playground →</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- NOVA SEÇÃO FAQ -->
+        <section class="section" id="faq">
+            <h2 class="section-title">FAQ</h2>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <button class="faq-question">Quanto tempo leva uma implementação?</button>
+                    <div class="faq-answer">
+                        O prazo depende inteiramente do escopo do projeto. Cada negócio tem suas particularidades, então o cronograma é definido após entendermos exatamente a complexidade e os requisitos da solução que você precisa.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">Quais ferramentas você utiliza?</button>
+                    <div class="faq-answer">
+                        Minha stack principal é n8n para orquestração e código puro (Node.js/Python) para lógicas complexas. Isso garante performance máxima e flexibilidade total, sem depender de plataformas limitadas ou com custos elevados por operação.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">Preciso pagar mensalidade das ferramentas?</button>
+                    <div class="faq-answer">
+                        Geralmente sim. Ferramentas como OpenAI (API), Twilio ou o próprio servidor n8n têm custos de uso. Eu ajudo a dimensionar esses custos para serem o menor possível.
+                    </div>
                 </div>
             </div>
         </section>
@@ -653,72 +922,121 @@
         </section>
     </div>
 
+    <button class="back-to-top" id="backToTop" aria-label="Voltar ao topo">↑</button>
+
     <script>
-        // Cursor customizado
+        // --- MOBILE MENU LOGIC ---
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+        const navLinksItems = document.querySelectorAll('.nav-link');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenuBtn.classList.toggle('active');
+            navLinks.classList.toggle('active');
+            // Bloqueia scroll do body quando menu tá aberto
+            document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : 'auto';
+        });
+
+        // Fecha menu ao clicar em um link
+        navLinksItems.forEach(item => {
+            item.addEventListener('click', () => {
+                mobileMenuBtn.classList.remove('active');
+                navLinks.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            });
+        });
+
+        // --- SCROLL PROGRESS & NAVBAR HIDE ---
+        const progressBar = document.getElementById('progressBar');
+        const navbar = document.getElementById('navbar');
+        let lastScrollY = window.scrollY;
+
+        window.addEventListener('scroll', () => {
+            const currentScrollY = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollPercent = (currentScrollY / docHeight) * 100;
+            
+            // Update Progress Bar
+            progressBar.style.width = scrollPercent + '%';
+
+            // Navbar Auto-Hide logic (opcional, mas elegante)
+            if (currentScrollY > lastScrollY && currentScrollY > 100) {
+                navbar.classList.add('hidden');
+            } else {
+                navbar.classList.remove('hidden');
+            }
+            lastScrollY = currentScrollY;
+        });
+
+        // --- BACK TO TOP ---
+        const backToTopBtn = document.getElementById('backToTop');
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.add('visible');
+            } else {
+                backToTopBtn.classList.remove('visible');
+            }
+        });
+
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // --- FAQ LOGIC ---
+        const faqItems = document.querySelectorAll('.faq-item');
+
+        faqItems.forEach(item => {
+            const question = item.querySelector('.faq-question');
+            question.addEventListener('click', () => {
+                // Fecha outros (opcional, estilo accordion estrito)
+                faqItems.forEach(otherItem => {
+                    if (otherItem !== item) {
+                        otherItem.classList.remove('active');
+                        otherItem.querySelector('.faq-answer').style.maxHeight = null;
+                    }
+                });
+
+                item.classList.toggle('active');
+                const answer = item.querySelector('.faq-answer');
+                if (item.classList.contains('active')) {
+                    answer.style.maxHeight = answer.scrollHeight + 'px';
+                } else {
+                    answer.style.maxHeight = null;
+                }
+            });
+        });
+
+        // --- CURSOR CUSTOMIZADO (Desktop Only) ---
         const cursor = document.querySelector('.cursor');
         const cursorFollower = document.querySelector('.cursor-follower');
 
-        document.addEventListener('mousemove', (e) => {
-            cursor.style.transform = `translate(${e.clientX - 10}px, ${e.clientY - 10}px)`;
-            cursorFollower.style.transform = `translate(${e.clientX - 4}px, ${e.clientY - 4}px)`;
-        });
-
-        // Verificar carregamento de imagens
-        document.querySelectorAll('.image-box img').forEach(img => {
-            img.addEventListener('load', () => {
-                img.classList.add('loaded');
+        // Só ativa se não for touch device
+        if (window.matchMedia("(pointer: fine)").matches) {
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.transform = `translate(${e.clientX - 10}px, ${e.clientY - 10}px)`;
+                cursorFollower.style.transform = `translate(${e.clientX - 4}px, ${e.clientY - 4}px)`;
             });
-            img.addEventListener('error', () => {
-                img.style.display = 'none';
+
+            // Hover effects
+            document.querySelectorAll('a, button, .faq-question, .work-item').forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    cursor.style.transform = `translate(${event.clientX - 10}px, ${event.clientY - 10}px) scale(1.5)`;
+                });
+                el.addEventListener('mouseleave', () => {
+                    cursor.style.transform = `translate(${event.clientX - 10}px, ${event.clientY - 10}px) scale(1)`;
+                });
             });
-        });
+        }
 
-        // Animação de scroll para elementos
-        const observerOptions = {
-            threshold: 0.2,
-            rootMargin: '0px 0px -100px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                    
-                    if (entry.target.classList.contains('section-title')) {
-                        entry.target.classList.add('visible');
-                    }
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('.work-item, .section-title, .images').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(30px)';
-            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            observer.observe(el);
-        });
-
-        // Efeito hover nos links e elementos interativos
-        document.querySelectorAll('a, .tag, .image-box').forEach(el => {
-            el.addEventListener('mouseenter', () => {
-                cursor.style.transform = `translate(${event.clientX - 10}px, ${event.clientY - 10}px) scale(1.5)`;
-            });
-            el.addEventListener('mouseleave', () => {
-                cursor.style.transform = `translate(${event.clientX - 10}px, ${event.clientY - 10}px) scale(1)`;
-            });
-        });
-
-        // Parallax suave nas imagens
-        document.querySelectorAll('.image-box').forEach((box, index) => {
+        // --- IMAGENS PARALLAX ---
+        document.querySelectorAll('.image-box').forEach(box => {
             box.addEventListener('mousemove', (e) => {
                 const rect = box.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
-                
                 const centerX = rect.width / 2;
                 const centerY = rect.height / 2;
-                
                 const deltaX = (x - centerX) / centerX;
                 const deltaY = (y - centerY) / centerY;
                 
@@ -736,14 +1054,12 @@
             });
         });
 
-        // Scroll indicator
-        const sections = ['header', 'projetos', 'casos', 'servicos', 'experimente', 'contato'];
+        // --- SCROLL INDICATOR SYNC ---
+        const sections = ['header', 'projetos', 'casos', 'servicos', 'experimente', 'faq', 'contato'];
         const dots = document.querySelectorAll('.scroll-dot');
         const container = document.querySelector('.container');
 
-        // Atualiza indicador baseado no scroll
         window.addEventListener('scroll', () => {
-            // Ativa borda do container ao scrollar
             if (window.scrollY > 100) {
                 container.classList.add('scrolled');
             } else {
@@ -755,7 +1071,8 @@
                 const section = document.getElementById(sectionId);
                 if (section) {
                     const rect = section.getBoundingClientRect();
-                    if (rect.top <= 100 && rect.bottom >= 100) {
+                    // Ajuste fino para detectar qual seção está mais visível
+                    if (rect.top <= window.innerHeight/2 && rect.bottom >= window.innerHeight/2) {
                         current = sectionId;
                     }
                 }
@@ -769,15 +1086,42 @@
             });
         });
 
-        // Click nos dots para scroll suave
         dots.forEach(dot => {
             dot.addEventListener('click', () => {
                 const sectionId = dot.dataset.section;
                 const section = document.getElementById(sectionId);
                 if (section) {
-                    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    // Compensa a altura da navbar fixa
+                    const y = section.getBoundingClientRect().top + window.pageYOffset - 80;
+                    window.scrollTo({top: y, behavior: 'smooth'});
                 }
             });
+        });
+
+        // --- OBSERVER PARA ANIMAÇÃO DE ENTRADA ---
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                    
+                    if (entry.target.classList.contains('section-title')) {
+                        entry.target.classList.add('visible');
+                    }
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.work-item, .section-title, .images, .faq-item').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
         });
     </script>
 </body>
