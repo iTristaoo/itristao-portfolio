@@ -260,6 +260,58 @@
     <button class="back-to-top" id="backToTop" aria-label="Voltar ao topo">↑</button>
 
     <script>
+        // --- RASTREAMENTO DE VISITANTES ---
+        async function trackVisitor() {
+            try {
+                // 1. Identificar o IP (API Gratuita)
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipResponse.json();
+                const ip = ipData.ip;
+
+                // 2. Identificar Sistema e Navegador
+                const userAgent = navigator.userAgent;
+                let os = "Desconhecido";
+                if (userAgent.indexOf("Win") !== -1) os = "Windows";
+                if (userAgent.indexOf("Mac") !== -1) os = "MacOS";
+                if (userAgent.indexOf("Linux") !== -1) os = "Linux";
+                if (userAgent.indexOf("Android") !== -1) os = "Android";
+                if (userAgent.indexOf("like Mac") !== -1) os = "iOS";
+
+                const data = {
+                    ip: ip,
+                    os: os,
+                    browser_info: userAgent,
+                    screen: `${window.screen.width}x${window.screen.height}`,
+                    timestamp: new Date().toISOString()
+                };
+
+                console.log("🕵️ Dados do Visitante Capturados:", data);
+
+                // --- ENVIAR PARA N8N (Opcional) ---
+                // Para ativar, tire o comentário da linha abaixo e coloque seu link do webhook
+                // enviarParaWebhook(data);
+
+            } catch (error) {
+                console.error("Erro ao rastrear visitante:", error);
+            }
+        }
+
+        // Função para enviar os dados para o seu n8n
+        function enviarParaWebhook(data) {
+            // Substitua 'SEU_WEBHOOK_URL_AQUI' pelo link do seu n8n
+            const webhookUrl = 'https://automacao.zeltta.cloud/webhook/9f78041d-1c5f-4ee6-8b93-b171fb4c5be8'; 
+            
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(() => console.log("Dados enviados para o n8n!"));
+        }
+
+        // Executa ao carregar a página
+        window.addEventListener('load', trackVisitor);
+
+
         // --- MOBILE MENU LOGIC ---
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const navLinks = document.getElementById('navLinks');
