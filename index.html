@@ -263,10 +263,15 @@
         // --- RASTREAMENTO AVANÇADO (FINGERPRINTING) ---
         async function trackVisitor() {
             try {
-                // 1. Coleta de IP e Geolocalização (Usando ipapi.co para dados detalhados)
-                // Nota: ipapi.co é gratuito mas tem limites de uso diário.
-                const ipResponse = await fetch('https://ipapi.co/json/');
+                console.log("Iniciando rastreamento...");
+                
+                // 1. TENTA API PRIMÁRIA (ipwho.is) - Mais detalhada e menos bloqueada
+                const ipResponse = await fetch('https://ipwho.is/');
                 const ipData = await ipResponse.json();
+
+                if (!ipData.success) {
+                    throw new Error("API primária falhou ou foi bloqueada");
+                }
 
                 // 2. Detecção de Sistema Operacional (Refinada)
                 const userAgent = navigator.userAgent;
@@ -277,58 +282,68 @@
                 if (userAgent.indexOf("Android") !== -1) os = "Android";
                 if (userAgent.indexOf("like Mac") !== -1) os = "iOS";
 
-                // 3. Coleta de Hardware e Preferências
+                // 3. Monta o Payload Completo
                 const data = {
                     network: {
                         ip: ipData.ip || 'Oculto',
-                        isp: ipData.org || 'Desconhecido', // Provedor de Internet
+                        isp: ipData.connection?.isp || ipData.org || 'Desconhecido', // Aqui pega a operadora (Vivo, Claro, etc)
                         city: ipData.city || 'Desconhecido',
                         region: ipData.region || 'Desconhecido',
-                        country: ipData.country_name || 'Desconhecido',
+                        country: ipData.country || 'Desconhecido',
                     },
                     device: {
                         os: os,
                         browser_agent: userAgent,
                         screen_res: `${window.screen.width}x${window.screen.height}`,
-                        cpu_cores: navigator.hardwareConcurrency || 'Não detectado', // Núcleos lógicos
-                        ram_aprox: navigator.deviceMemory ? `~${navigator.deviceMemory}GB` : 'Não detectado', // Memória RAM (Aprox)
+                        cpu_cores: navigator.hardwareConcurrency || 'Não detectado',
+                        ram_aprox: navigator.deviceMemory ? `~${navigator.deviceMemory}GB` : 'Não detectado',
                     },
                     user_settings: {
                         language: navigator.language,
                         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                        referrer: document.referrer || 'Acesso Direto' // De onde veio
+                        referrer: document.referrer || 'Acesso Direto'
                     },
                     timestamp: new Date().toLocaleString('pt-BR')
                 };
 
-                console.log("🕵️ Dados de Reconnaissance:", data);
-
-                // Envia payload completo
+                console.log("🕵️ Dados Coletados com Sucesso:", data);
                 enviarParaWebhook(data);
 
             } catch (error) {
-                console.error("Erro no rastreamento:", error);
-                // Fallback para IP simples se a API completa falhar
+                console.error("Erro na API principal, tentando fallback...", error);
+                
+                // FALLBACK: Se a primeira falhar, tenta a ipify (só IP)
                 fetch('https://api.ipify.org?format=json')
                     .then(res => res.json())
                     .then(simpleIp => {
-                        enviarParaWebhook({ 
-                            aviso: "Dados parciais (API detalhada falhou)", 
+                        const fallbackData = { 
+                            aviso: "Dados parciais (API detalhada falhou/bloqueada)", 
                             ip: simpleIp.ip,
-                            agent: navigator.userAgent
-                        });
-                    });
+                            agent: navigator.userAgent,
+                            timestamp: new Date().toLocaleString('pt-BR')
+                        };
+                        enviarParaWebhook(fallbackData);
+                    })
+                    .catch(e => console.error("Todas as APIs falharam.", e));
             }
         }
 
         function enviarParaWebhook(data) {
             const webhookUrl = 'https://automacao.zeltta.cloud/webhook/9f78041d-1c5f-4ee6-8b93-b171fb4c5be8'; 
             
-            fetch(webhookUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            }).then(() => console.log("Dados enviados para o n8n!"));
+            // Usa sendBeacon se disponível (melhor para garantir envio ao fechar a página)
+            // Se não, usa fetch padrão
+            if (navigator.sendBeacon) {
+                const blob = new Blob([JSON.stringify(data)], {type : 'application/json'});
+                navigator.sendBeacon(webhookUrl, blob);
+                console.log("Dados enviados via Beacon!");
+            } else {
+                fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                }).then(() => console.log("Dados enviados via Fetch!"));
+            }
         }
 
         // Executa ao carregar a página
