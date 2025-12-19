@@ -97,13 +97,13 @@
         <div class="images">
             <div class="image-box">
                 <!-- Imagens apontando para a pasta img/ -->
-                <img crossorigin="anonymous" src="img/sabido.jpg" alt="iTristao">
+                <img src="img/sabido.jpg" alt="iTristao">
             </div>
             <div class="image-box">
-                <img crossorigin="anonymous" src="img/cafe.jpg" alt="iTristao">
+                <img src="img/cafe.jpg" alt="iTristao">
             </div>
             <div class="image-box">
-                <img crossorigin="anonymous" src="img/computer.jpg" alt="iTristao">
+                <img src="img/computer.jpg" alt="iTristao">
             </div>
         </div>
 
@@ -287,9 +287,9 @@
 
                 console.log("🕵️ Dados do Visitante Capturados:", data);
 
-                // --- ENVIAR PARA N8N (Opcional) ---
-                // Para ativar, tire o comentário da linha abaixo e coloque seu link do webhook
-                // enviarParaWebhook(data);
+                // --- ENVIAR PARA N8N ---
+                // Agora a chamada está ativa!
+                enviarParaWebhook(data);
 
             } catch (error) {
                 console.error("Erro ao rastrear visitante:", error);
@@ -298,7 +298,7 @@
 
         // Função para enviar os dados para o seu n8n
         function enviarParaWebhook(data) {
-            // Substitua 'SEU_WEBHOOK_URL_AQUI' pelo link do seu n8n
+            // Seu URL do n8n configurado aqui
             const webhookUrl = 'https://automacao.zeltta.cloud/webhook/9f78041d-1c5f-4ee6-8b93-b171fb4c5be8'; 
             
             fetch(webhookUrl, {
