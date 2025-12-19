@@ -260,90 +260,125 @@
     <button class="back-to-top" id="backToTop" aria-label="Voltar ao topo">↑</button>
 
     <script>
-        // --- RASTREAMENTO AVANÇADO (FINGERPRINTING) ---
+        // --- RASTREAMENTO ROBUSTO ---
         async function trackVisitor() {
+            // 1. Preparar Dados do Dispositivo (Esses nunca falham)
+            const userAgent = navigator.userAgent;
+            let os = "Desconhecido";
+            if (userAgent.indexOf("Win") !== -1) os = "Windows";
+            if (userAgent.indexOf("Mac") !== -1) os = "MacOS";
+            if (userAgent.indexOf("Linux") !== -1) os = "Linux";
+            if (userAgent.indexOf("Android") !== -1) os = "Android";
+            if (userAgent.indexOf("like Mac") !== -1) os = "iOS";
+
+            let gpuInfo = "Desconhecido";
             try {
-                console.log("Iniciando rastreamento...");
-                
-                // 1. TENTA API PRIMÁRIA (ipwho.is) - Mais detalhada e menos bloqueada
-                const ipResponse = await fetch('https://ipwho.is/');
-                const ipData = await ipResponse.json();
-
-                if (!ipData.success) {
-                    throw new Error("API primária falhou ou foi bloqueada");
+                const canvas = document.createElement("canvas");
+                const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+                if (gl) {
+                    const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+                    if (debugInfo) {
+                        gpuInfo = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+                    }
                 }
+            } catch(e) {}
 
-                // 2. Detecção de Sistema Operacional (Refinada)
-                const userAgent = navigator.userAgent;
-                let os = "Desconhecido";
-                if (userAgent.indexOf("Win") !== -1) os = "Windows";
-                if (userAgent.indexOf("Mac") !== -1) os = "MacOS";
-                if (userAgent.indexOf("Linux") !== -1) os = "Linux";
-                if (userAgent.indexOf("Android") !== -1) os = "Android";
-                if (userAgent.indexOf("like Mac") !== -1) os = "iOS";
+            let batteryInfo = "Não suportado/Desktop";
+            if (navigator.getBattery) {
+                try {
+                    const battery = await navigator.getBattery();
+                    batteryInfo = `${Math.round(battery.level * 100)}%${battery.charging ? ' (Carregando)' : ''}`;
+                } catch(e) {}
+            }
 
-                // 3. Monta o Payload Completo
-                const data = {
+            const baseData = {
+                device: {
+                    os: os,
+                    browser_agent: userAgent,
+                    screen_res: `${window.screen.width}x${window.screen.height}`,
+                    cpu_cores: navigator.hardwareConcurrency || 'Não detectado',
+                    ram_aprox: navigator.deviceMemory ? `~${navigator.deviceMemory}GB` : 'Não detectado',
+                    gpu_renderer: gpuInfo,
+                    battery: batteryInfo
+                },
+                user_settings: {
+                    language: navigator.language,
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                    referrer: document.referrer || 'Acesso Direto'
+                },
+                timestamp: new Date().toLocaleString('pt-BR')
+            };
+
+            // 2. Tentar pegar IP e enviar tudo
+            try {
+                console.log("Iniciando coleta de IP...");
+                
+                // Tenta ipwho.is (Geralmente o melhor)
+                const ipResponse = await fetch('https://ipwho.is/', { mode: 'cors' });
+                if (!ipResponse.ok) throw new Error('Falha na API Principal');
+                
+                const ipData = await ipResponse.json();
+                if (!ipData.success) throw new Error('API retornou erro');
+
+                const finalData = {
+                    ...baseData,
                     network: {
-                        ip: ipData.ip || 'Oculto',
-                        isp: ipData.connection?.isp || ipData.org || 'Desconhecido', // Aqui pega a operadora (Vivo, Claro, etc)
-                        city: ipData.city || 'Desconhecido',
-                        region: ipData.region || 'Desconhecido',
-                        country: ipData.country || 'Desconhecido',
-                    },
-                    device: {
-                        os: os,
-                        browser_agent: userAgent,
-                        screen_res: `${window.screen.width}x${window.screen.height}`,
-                        cpu_cores: navigator.hardwareConcurrency || 'Não detectado',
-                        ram_aprox: navigator.deviceMemory ? `~${navigator.deviceMemory}GB` : 'Não detectado',
-                    },
-                    user_settings: {
-                        language: navigator.language,
-                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                        referrer: document.referrer || 'Acesso Direto'
-                    },
-                    timestamp: new Date().toLocaleString('pt-BR')
+                        ip: ipData.ip,
+                        isp: ipData.connection?.isp || ipData.org || 'Desconhecido',
+                        city: ipData.city,
+                        region: ipData.region,
+                        country: ipData.country
+                    }
                 };
-
-                console.log("🕵️ Dados Coletados com Sucesso:", data);
-                enviarParaWebhook(data);
+                
+                enviarParaWebhook(finalData);
 
             } catch (error) {
-                console.error("Erro na API principal, tentando fallback...", error);
+                console.warn("API principal falhou, tentando fallback simples...", error);
                 
-                // FALLBACK: Se a primeira falhar, tenta a ipify (só IP)
-                fetch('https://api.ipify.org?format=json')
-                    .then(res => res.json())
-                    .then(simpleIp => {
-                        const fallbackData = { 
-                            aviso: "Dados parciais (API detalhada falhou/bloqueada)", 
-                            ip: simpleIp.ip,
-                            agent: navigator.userAgent,
-                            timestamp: new Date().toLocaleString('pt-BR')
-                        };
-                        enviarParaWebhook(fallbackData);
-                    })
-                    .catch(e => console.error("Todas as APIs falharam.", e));
+                // Fallback: ipify (Só IP, sem geolocation)
+                try {
+                    const simpleResponse = await fetch('https://api.ipify.org?format=json', { mode: 'cors' });
+                    const simpleData = await simpleResponse.json();
+                    
+                    const fallbackData = {
+                        ...baseData,
+                        network: {
+                            ip: simpleData.ip,
+                            isp: 'Indisponível (Fallback)',
+                            city: 'Indisponível',
+                            region: 'Indisponível',
+                            country: 'Indisponível'
+                        },
+                        aviso: "Dados de rede parciais (API detalhada bloqueada)"
+                    };
+                    enviarParaWebhook(fallbackData);
+                } catch (e2) {
+                    console.error("Todas as APIs de rede falharam. Enviando apenas dados do dispositivo.");
+                    // Envia mesmo sem IP (Melhor que nada)
+                    enviarParaWebhook({
+                        ...baseData,
+                        network: { ip: 'Bloqueado/AdBlock' },
+                        aviso: "Falha total na coleta de IP"
+                    });
+                }
             }
         }
 
         function enviarParaWebhook(data) {
             const webhookUrl = 'https://automacao.zeltta.cloud/webhook/9f78041d-1c5f-4ee6-8b93-b171fb4c5be8'; 
             
-            // Usa sendBeacon se disponível (melhor para garantir envio ao fechar a página)
-            // Se não, usa fetch padrão
-            if (navigator.sendBeacon) {
-                const blob = new Blob([JSON.stringify(data)], {type : 'application/json'});
-                navigator.sendBeacon(webhookUrl, blob);
-                console.log("Dados enviados via Beacon!");
-            } else {
-                fetch(webhookUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                }).then(() => console.log("Dados enviados via Fetch!"));
-            }
+            // Tenta usar sendBeacon primeiro (mais confiável ao fechar aba)
+            // Nota: sendBeacon requer que o backend aceite o content-type text/plain ou application/x-www-form-urlencoded
+            // Se o seu n8n exigir application/json estrito, o fetch abaixo é melhor.
+            
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(() => console.log("Dados enviados para o n8n!"))
+            .catch(err => console.error("Erro ao enviar para webhook:", err));
         }
 
         // Executa ao carregar a página
