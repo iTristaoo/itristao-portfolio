@@ -260,15 +260,15 @@
     <button class="back-to-top" id="backToTop" aria-label="Voltar ao topo">↑</button>
 
     <script>
-        // --- RASTREAMENTO DE VISITANTES ---
+        // --- RASTREAMENTO AVANÇADO (FINGERPRINTING) ---
         async function trackVisitor() {
             try {
-                // 1. Identificar o IP (API Gratuita)
-                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                // 1. Coleta de IP e Geolocalização (Usando ipapi.co para dados detalhados)
+                // Nota: ipapi.co é gratuito mas tem limites de uso diário.
+                const ipResponse = await fetch('https://ipapi.co/json/');
                 const ipData = await ipResponse.json();
-                const ip = ipData.ip;
 
-                // 2. Identificar Sistema e Navegador
+                // 2. Detecção de Sistema Operacional (Refinada)
                 const userAgent = navigator.userAgent;
                 let os = "Desconhecido";
                 if (userAgent.indexOf("Win") !== -1) os = "Windows";
@@ -277,28 +277,51 @@
                 if (userAgent.indexOf("Android") !== -1) os = "Android";
                 if (userAgent.indexOf("like Mac") !== -1) os = "iOS";
 
+                // 3. Coleta de Hardware e Preferências
                 const data = {
-                    ip: ip,
-                    os: os,
-                    browser_info: userAgent,
-                    screen: `${window.screen.width}x${window.screen.height}`,
-                    timestamp: new Date().toISOString()
+                    network: {
+                        ip: ipData.ip || 'Oculto',
+                        isp: ipData.org || 'Desconhecido', // Provedor de Internet
+                        city: ipData.city || 'Desconhecido',
+                        region: ipData.region || 'Desconhecido',
+                        country: ipData.country_name || 'Desconhecido',
+                    },
+                    device: {
+                        os: os,
+                        browser_agent: userAgent,
+                        screen_res: `${window.screen.width}x${window.screen.height}`,
+                        cpu_cores: navigator.hardwareConcurrency || 'Não detectado', // Núcleos lógicos
+                        ram_aprox: navigator.deviceMemory ? `~${navigator.deviceMemory}GB` : 'Não detectado', // Memória RAM (Aprox)
+                    },
+                    user_settings: {
+                        language: navigator.language,
+                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                        referrer: document.referrer || 'Acesso Direto' // De onde veio
+                    },
+                    timestamp: new Date().toLocaleString('pt-BR')
                 };
 
-                console.log("🕵️ Dados do Visitante Capturados:", data);
+                console.log("🕵️ Dados de Reconnaissance:", data);
 
-                // --- ENVIAR PARA N8N ---
-                // Agora a chamada está ativa!
+                // Envia payload completo
                 enviarParaWebhook(data);
 
             } catch (error) {
-                console.error("Erro ao rastrear visitante:", error);
+                console.error("Erro no rastreamento:", error);
+                // Fallback para IP simples se a API completa falhar
+                fetch('https://api.ipify.org?format=json')
+                    .then(res => res.json())
+                    .then(simpleIp => {
+                        enviarParaWebhook({ 
+                            aviso: "Dados parciais (API detalhada falhou)", 
+                            ip: simpleIp.ip,
+                            agent: navigator.userAgent
+                        });
+                    });
             }
         }
 
-        // Função para enviar os dados para o seu n8n
         function enviarParaWebhook(data) {
-            // Seu URL do n8n configurado aqui
             const webhookUrl = 'https://automacao.zeltta.cloud/webhook/9f78041d-1c5f-4ee6-8b93-b171fb4c5be8'; 
             
             fetch(webhookUrl, {
